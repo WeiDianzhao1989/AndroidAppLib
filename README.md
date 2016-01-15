@@ -2,7 +2,8 @@
 a library contains all tools necessary for establishing a app
 
 ##network
-establish on okhttp
+以okhttp为基础构建的网络库，支持 post/get 请求,断点下载,文件上传，批处理执行网络请求.
+
 
 init network
  
