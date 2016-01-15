@@ -14,10 +14,10 @@ init network
                             .context(this)
                             .readTimeOut(30 * 1000)
                             .connectTimeOut(30 * 1000)
-                            .requestParamsInterceptor(new WDRequestParamsInterceptor(false,
+                            .requestParamsInterceptor(new xxRequestParamsInterceptor(false,
                                     true,Constants.ENCRYPT_FLAG_PRIVATE))
-                            .requestHeaderInterceptor(new WDRequestHeadersInterceptor(false,true))
-                            .responseProcessor(new WDResponseProcessor(Constants.ENCRYPT_FLAG_PRIVATE))
+                            .requestHeaderInterceptor(new xxRequestHeadersInterceptor(false,true))
+                            .responseProcessor(new xxResponseProcessor(Constants.ENCRYPT_FLAG_PRIVATE))
                             .build();
     NetworkFetcher.getInstance().initNetwork(configuration);
     
