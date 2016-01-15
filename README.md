@@ -32,7 +32,7 @@ init network
 
         HttpPostRequest<CommodityCommentResponse>
                 request = new HttpPostRequest.Builder<CommodityCommentResponse>()
-                .url(Protocol.HOST + "appserver_getItemComments.do")
+                .url(Protocol.HOST + "xxxxxxx.do")
                 .params(params)
                 .parser(new CommodityCommentResponseParser())
                 .callback(new Callback<CommodityCommentResponse>() {
@@ -58,7 +58,7 @@ init network
         下载文件
         
         FileDownloadRequest downloadrequest = new FileDownloadRequest.Builder()
-                .url("https://static.koudai.com/m/appupdate/iOS.zip")
+                .url("https://xxxxxx/m/appupdate/iOS.zip")
                 .saveFileAbsolutelyPath(filename)
                 .isAutoResume(true)
                 .callback(new FileDownloadCallback() {
