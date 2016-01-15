@@ -64,22 +64,18 @@ init network
                 .callback(new FileDownloadCallback() {
                     @Override
                     public void onProgress(long total, long current) {
-                        Log.e("weidian", "total=" + total + "--current =" + current);
                     }
 
                     @Override
                     public void onResponse(File result) {
-                        Log.e("weidian",result.getName());
                     }
 
                     @Override
                     public void onError(NetworkError error) {
-                        Log.e("weidian",error.getErrorMessage());
                     }
 
                     @Override
                     public void onCancel() {
-                        Log.e("weidian", "onCancel");
                     }
 
 
