@@ -3,14 +3,14 @@
 ###1. 创建宿主工程
 
 1. 创建Android应用工程.
-2. 添加com.autonavi.plugin.jar到依赖.
+2. 添加com.weidian.plugin.jar到依赖.
 3. 添加继承自HostApplication的自定义Application.
 4. 创建packagename.Controller类.
 
 ###2. 创建模块工程
 
 1. 创建Android应用工程.
-2. 添加com.autonavi.plugin.jar到依赖, 但是编译时不导出.
+2. 添加com.weidian.plugin.jar到依赖, 但是编译时不导出.
 3. 创建packagename.Controller类.
 4. 编译模块工程为apk文件, 放到宿主工程的assets/module/文件夹, 修改扩展名为png(部分android2.2系统assets中的普通文件大小限制在1M以内, 但png不受限制).
 5. 在宿主工程的AndroidManifest.xml中application节点内加入:
