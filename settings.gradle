@@ -1,1 +1,1 @@
-include ':network', ':network'
+include ':network', ':network', ':plugin'

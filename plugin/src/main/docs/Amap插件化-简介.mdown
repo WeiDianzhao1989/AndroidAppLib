@@ -1,0 +1,30 @@
+## Amap Android客户端插件化-简介
+
+###1. plugin项目特性
+
+* 插件使用原生编译的apk, 配置写在AndroidManifest.xml, 使用简单方便.
+* Context和资源隔离, 每个插件有自己的Context, Resource, Assets.
+* 所有插件异步加载.
+* 插件可按需加载, 在调用时动态载入.
+* 依赖性小, 插件加载错误仅影响自身提供的功能.
+
+###2. plugin项目重要的类型结构
+
+* `PluginMsg`: 插件间交互数据的消息体.
+* `PluginManager`: 消息体分发的管理类.
+* `Installer`: 插件安装, 加载, 卸载的管理类.
+
+###3. 其他重要的类型和概念
+
+* `Plugin`: 插件的父类, 消息交互的目标对象.
+* `Host`: 宿主, 即主工程, 继承自Plugin.
+* `Module`: 模块, 即主工程的插件, 继承自Plugin.
+* `HostApplication`: 宿主的Application基类, 宿主必须有从改类型派生的Application.
+* `HostParentClassLoader`: 宿主的ClassLoader的parent, ClassLoader结构的关键, 负责关联模块的ClassLoader.
+* `ModuleClassLoader`: 模块的ClassLoader, 负责加载模块中的类型.
+* `ModuleContext`: 模块的Context, 持有基础资源.
+* `ControllerProxy`: 插件消息交互的代理类, 管理最终的消息处理.
+* `ContextProxy`: 插件中Activity的Context的代理, 帮助Activity取到对应的资源.
+* `PluginActivity`: 插件Activity的父类.
+* `PluginFragmentActivity`: 插件FragmentActivity的父类.
+* `PluginDialog`: 插件Dialog的父类.
