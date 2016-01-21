@@ -8,10 +8,6 @@ import com.weidian.plugin.util.ReflectUtil;
 import java.lang.reflect.Field;
 import java.util.Map;
 
-/**
- * @author: wyouflf
- * @date: 2014/10/30
- */
 /*package*/ final class HostParentClassLoader extends ClassLoader {
 
 	private static HostParentClassLoader instance;

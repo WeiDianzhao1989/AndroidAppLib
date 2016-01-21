@@ -5,10 +5,6 @@ import com.weidian.plugin.core.ctx.Plugin;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * @author: wyouflf
- * @date: 2014/10/29
- */
 public final class PluginMsg {
 	private String targetPackage;
 	private final String cmd;

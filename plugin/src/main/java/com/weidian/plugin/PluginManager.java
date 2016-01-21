@@ -13,10 +13,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 
-/**
- * @author: wyouflf
- * @date: 2014/11/03
- */
 public final class PluginManager {
 
 	private static HostApplication app;

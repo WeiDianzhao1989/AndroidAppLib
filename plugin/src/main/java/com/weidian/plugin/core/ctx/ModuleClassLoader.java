@@ -6,10 +6,6 @@ import dalvik.system.DexClassLoader;
 
 import java.io.File;
 
-/**
- * @author: wyouflf
- * @date: 2014/10/30
- */
 /*package*/ final class ModuleClassLoader extends DexClassLoader {
 
 	private Module module;

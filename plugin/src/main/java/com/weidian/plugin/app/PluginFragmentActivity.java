@@ -12,10 +12,6 @@ import com.weidian.plugin.core.ctx.ContextProxy;
 import com.weidian.plugin.core.ctx.Module;
 import com.weidian.plugin.core.ctx.Plugin;
 
-/**
- * @author: wyouflf
- * @date: 2014/11/14
- */
 public class PluginFragmentActivity extends FragmentActivity {
 
 	private ContextProxy contextProxy = null;

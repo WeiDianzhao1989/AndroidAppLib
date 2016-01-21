@@ -11,10 +11,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @author: wyouflf
- * @date: 2014/10/29
- */
 public final class Module extends Plugin {
 
 	private List<BroadcastReceiver> registerReceiverList;

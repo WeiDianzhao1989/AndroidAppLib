@@ -7,10 +7,6 @@ import android.content.res.Resources;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 
-/**
- * @author: wyouflf
- * @date: 2014/11/14
- */
 public final class ContextProxy extends ContextThemeWrapper {
 
 	private final Plugin plugin;

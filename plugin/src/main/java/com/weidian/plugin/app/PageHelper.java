@@ -19,10 +19,6 @@ import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * @author: wyouflf
- * @date: 2014/11/24
- */
 public class PageHelper {
 	private PageHelper() {
 	}

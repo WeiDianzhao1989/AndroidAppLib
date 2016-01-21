@@ -10,10 +10,6 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * @author: wyouflf
- * @date: 2014/11/02
- */
 /*package*/ class GetPageInfoInvoker extends Invoker {
 	public GetPageInfoInvoker(Plugin plugin, Object controller, Method method) {
 		super(plugin, controller, method);

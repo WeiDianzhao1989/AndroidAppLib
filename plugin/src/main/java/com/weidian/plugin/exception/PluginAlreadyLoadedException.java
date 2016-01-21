@@ -1,9 +1,5 @@
 package com.weidian.plugin.exception;
 
-/**
- * @author: wyouflf
- * @date: 2014/10/30
- */
 public class PluginAlreadyLoadedException extends RuntimeException {
 	private String packageName;
 

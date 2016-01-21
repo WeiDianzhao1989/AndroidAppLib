@@ -4,10 +4,6 @@ import android.content.res.AssetManager;
 
 import java.lang.reflect.Method;
 
-/**
- * @author: wyouflf
- * @date: 2014/10/29
- */
 public class ReflectUtil {
 
 	private static Method addAssetPathMethod;

@@ -7,10 +7,6 @@ import com.weidian.plugin.core.ctx.Plugin;
 import java.lang.reflect.Method;
 import java.util.Map;
 
-/**
- * @author: wyouflf
- * @date: 2014/11/02
- */
 /*package*/ class SyncInvoker extends Invoker {
 
 	public SyncInvoker(Plugin plugin, Object controller, Method method) {

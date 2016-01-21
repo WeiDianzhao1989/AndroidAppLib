@@ -9,10 +9,6 @@ import com.weidian.plugin.task.TaskManager;
 import java.lang.reflect.Method;
 import java.util.Map;
 
-/**
- * @author: wyouflf
- * @date: 2014/11/13
- */
 /*package*/ class AsyncInvoker extends Invoker {
 	public AsyncInvoker(Plugin plugin, Object controller, Method method) {
 		super(plugin, controller, method);

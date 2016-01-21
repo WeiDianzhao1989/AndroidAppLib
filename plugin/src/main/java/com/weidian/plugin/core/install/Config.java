@@ -6,12 +6,6 @@ import android.graphics.drawable.Drawable;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 
-/**
- * from AndroidManifest.xml
- *
- * @author: wyouflf
- * @date: 2014/10/30
- */
 public final class Config {
 	/*package*/ String label;
 	/*package*/ String packageName;

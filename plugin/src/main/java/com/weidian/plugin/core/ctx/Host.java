@@ -4,10 +4,6 @@ import android.app.Application;
 import com.weidian.plugin.core.controller.ControllerProxy;
 import com.weidian.plugin.core.install.Config;
 
-/**
- * @author: wyouflf
- * @date: 2014/10/29
- */
 public final class Host extends Plugin {
 
 	public Host(Application app, Config config) {

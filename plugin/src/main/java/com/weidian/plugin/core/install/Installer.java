@@ -25,10 +25,6 @@ import java.util.concurrent.Executor;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-/**
- * @author: wyouflf
- * @date: 2014/10/30
- */
 public final class Installer {
 
 	private Installer() {

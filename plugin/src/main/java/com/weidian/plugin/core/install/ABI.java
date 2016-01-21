@@ -2,10 +2,6 @@ package com.weidian.plugin.core.install;
 
 import android.os.Build;
 
-/**
- * @author: wyouflf
- * @date: 2014/10/31
- */
 /*package*/ enum ABI {
 	ARM("armeabi", "lib/armeabi"),
 	ARM_V7A("armeabi-v7a", "lib/armeabi-v7a"),

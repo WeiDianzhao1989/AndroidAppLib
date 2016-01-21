@@ -4,10 +4,6 @@ import android.database.Cursor;
 
 import java.io.*;
 
-/**
- * @author: wyouflf
- * @date: 2014/10/29
- */
 public class IOUtil {
 
 	private IOUtil() {

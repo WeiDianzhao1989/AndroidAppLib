@@ -13,10 +13,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * @author: wyouflf
- * @date: 2014/11/02
- */
 final public class ControllerProxy {
 
 	private static final String CONTROLLER_CLS_NAME = "Controller";

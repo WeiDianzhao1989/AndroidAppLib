@@ -17,10 +17,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 
-/**
- * @author: wyouflf
- * @date: 2014/10/30
- */
 /*package*/ class ConfigHelper {
 
 	private final static String META_ACTION = "action";

@@ -4,10 +4,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-/**
- * @author: wyouflf
- * @date: 2014/10/30
- */
 public class PluginInstallException extends Exception {
 
 	private List<String> packageNameList;

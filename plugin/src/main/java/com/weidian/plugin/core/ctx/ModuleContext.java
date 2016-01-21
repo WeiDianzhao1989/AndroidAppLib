@@ -12,10 +12,6 @@ import com.weidian.plugin.util.ReflectUtil;
 
 import java.io.File;
 
-/**
- * @author: wyouflf
- * @date: 2014/10/29
- */
 public final class ModuleContext extends ContextThemeWrapper {
 
 	/*package*/ final ModuleClassLoader classLoader;

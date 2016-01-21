@@ -11,10 +11,6 @@ import com.weidian.plugin.PluginManager;
 
 import java.io.InputStream;
 
-/**
- * @author: wyouflf
- * @date: 2015/01/30
- */
 /*package*/ final class ResourcesProxy extends Resources {
 
 	private final Resources appRes;

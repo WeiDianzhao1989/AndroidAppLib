@@ -6,10 +6,6 @@ import com.weidian.plugin.core.controller.ControllerProxy;
 import com.weidian.plugin.core.install.Config;
 import com.weidian.plugin.core.install.Installer;
 
-/**
- * @author: wyouflf
- * @date: 2014/10/29
- */
 public abstract class Plugin {
 	private final Config config;
 	private final Context context;

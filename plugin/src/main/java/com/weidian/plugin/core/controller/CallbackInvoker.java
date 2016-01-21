@@ -6,10 +6,6 @@ import com.weidian.plugin.core.ctx.Plugin;
 
 import java.lang.reflect.Method;
 
-/**
- * @author: wyouflf
- * @date: 2014/11/03
- */
 /*package*/ class CallbackInvoker extends Invoker {
 	public CallbackInvoker(Plugin plugin, Object controller, Method method) {
 		super(plugin, controller, method);

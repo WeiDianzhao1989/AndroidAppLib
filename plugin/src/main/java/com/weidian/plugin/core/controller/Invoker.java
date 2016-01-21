@@ -6,10 +6,6 @@ import com.weidian.plugin.core.ctx.Plugin;
 
 import java.lang.reflect.Method;
 
-/**
- * @author: wyouflf
- * @date: 2014/11/02
- */
 /*package*/ abstract class Invoker {
 
 	protected final Plugin plugin;

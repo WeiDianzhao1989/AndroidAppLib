@@ -8,10 +8,6 @@ import com.weidian.plugin.core.ctx.Module;
 import java.io.File;
 import java.util.Map;
 
-/**
- * @author: wyouflf
- * @date: 2014/10/29
- */
 public abstract class HostApplication extends Application {
 
 	@Override

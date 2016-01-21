@@ -1,9 +1,5 @@
 package com.weidian.plugin.exception;
 
-/**
- * @author: wyouflf
- * @date: 2014/11/03
- */
 public class ControllerInvokeException extends RuntimeException {
 
 	public ControllerInvokeException(String message) {
