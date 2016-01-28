@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="pull_to_refresh_alert_text_color">#898989</color>
+</resources>
