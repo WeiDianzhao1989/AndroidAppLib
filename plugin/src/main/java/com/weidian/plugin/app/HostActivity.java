@@ -9,7 +9,7 @@ package com.weidian.plugin.app;
 //否则插件中的Activity将无法打开.
 //
 //<activity android:theme="@style/host_activity_style"
-//          android:name="com.autonavi.plugin.app.HostActivity">
+//          android:name="com.weidian.plugin.app.HostActivity">
 //    <intent-filter>
 //        <action android:name="action.plugin.Activity" />
 //        <category android:name="android.intent.category.DEFAULT" />
