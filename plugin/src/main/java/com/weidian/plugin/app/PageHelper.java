@@ -31,7 +31,7 @@ public class PageHelper {
 	// action和约定
 	public final static String ACTION_PREFIX = "plugin."; // 插件的action前缀
 	public final static String ACTION_HOST_ACTIVITY = "action.plugin.Activity";
-	public final static String HOST_ACTIVITY = "com.autonavi.plugin.app.HostActivity";
+	public final static String HOST_ACTIVITY = "com.weidian.plugin.app.HostActivity";
 
 	// 记录目标Activity
 	private final static String TARGET_ACTIVITY_PREF = "TARGET_ACTIVITY_PREF";
