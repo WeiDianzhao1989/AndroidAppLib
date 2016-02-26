@@ -100,7 +100,7 @@ public final class Dispatcher {
    * Cancel all calls currently enqueued or executing. Includes calls executed both {@linkplain
    * Call#execute() synchronously} and {@linkplain Call#enqueue asynchronously}.
    */
-  public synchronized void cancelAll() {
+//  public synchronized void cancelAll() {
 //    for (AsyncCall call : readyAsyncCalls) {
 //      call.cancel();
 //    }
@@ -108,11 +108,11 @@ public final class Dispatcher {
 //    for (AsyncCall call : runningAsyncCalls) {
 //      call.cancel();
 //    }
-
-    for (RealCall call : runningSyncCalls) {
-      call.cancel();
-    }
-  }
+//
+//    for (RealCall call : runningSyncCalls) {
+//      call.cancel();
+//    }
+//  }
 
   /** Used by {@code AsyncCall#run} to signal completion. */
 //  synchronized void finished(AsyncCall call) {

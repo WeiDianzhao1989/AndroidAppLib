@@ -5,6 +5,7 @@ import android.text.TextUtils;
 
 import com.koudai.net.NetworkLibraryConstants;
 import com.koudai.net.callback.Callback;
+import com.koudai.net.callback.RetryCallback;
 import com.koudai.net.kernal.HttpUrl;
 import com.koudai.net.kernal.RequestBody;
 import com.koudai.net.kernal.internal.Util;
@@ -38,6 +39,7 @@ public final class HttpGetRequest<T> extends HttpRequest<T> {
         this.nonEncryptParams = builder.nonEncryptParams != null ? builder.nonEncryptParams : new RequestParams();
         this.requestLevel = builder.requestLevel;
         this.callback = builder.callback;
+        this.retryCallback = builder.retryCallback;
         this.parser = builder.parser;
         this.priority = builder.priority;
 
@@ -121,7 +123,7 @@ public final class HttpGetRequest<T> extends HttpRequest<T> {
             return httpUrlBuilder.build();
 
         } catch (JSONException e) {
-            NetworkLog.getInstance().e(e.getMessage());
+            e.printStackTrace();
         }
 
 
@@ -138,6 +140,27 @@ public final class HttpGetRequest<T> extends HttpRequest<T> {
         return new DefaultResponseCallback<T>(this, responseProcessor, parser);
     }
 
+    public Builder<T> newBuilder() {
+
+        Builder<T> builder = new Builder<T>();
+        builder.url(this.url)
+                .headers(this.headers)
+                .params(this.params)
+                .nonEncryptParams(this.nonEncryptParams)
+                .charset(this.encodeCharset)
+                .callback(this.callback)
+                .parser(this.parser)
+                .requestLevel(this.requestLevel)
+                .retryTimesAfterFailed(this.maxRetryTimesAfterFailed)
+                .priority(this.priority)
+                .requestHeaderInterceptor(this.requestHeaderInterceptor)
+                .requestParamsInterceptor(this.requestParamsInterceptor)
+                .responseProcessor(this.responseProcessor)
+                .retryCallback(this.retryCallback)
+                .build();
+
+        return builder;
+    }
 
     /**
      * 构建请求
@@ -154,6 +177,8 @@ public final class HttpGetRequest<T> extends HttpRequest<T> {
         private Charset encodeCharset = Util.UTF_8;
 
         private Callback<T> callback;
+        private RetryCallback<HttpPostRequest<T>> retryCallback;
+
         private Parser<T> parser;
         private int requestLevel = Level.MAIN_TASK;
         private int retryTimesAfterFailed = -1;
@@ -217,18 +242,23 @@ public final class HttpGetRequest<T> extends HttpRequest<T> {
             return this;
         }
 
-        public Builder requestHeaderInterceptor(IRequestHeaderInterceptor requestHeaderInterceptor) {
+        public Builder<T> requestHeaderInterceptor(IRequestHeaderInterceptor requestHeaderInterceptor) {
             this.requestHeaderInterceptor = requestHeaderInterceptor;
             return this;
         }
 
-        public Builder requestParamsInterceptor(IRequestParamsInterceptor requestParamsInterceptor) {
+        public Builder<T> requestParamsInterceptor(IRequestParamsInterceptor requestParamsInterceptor) {
             this.requestParamsInterceptor = requestParamsInterceptor;
             return this;
         }
 
-        public Builder responseProcessor(IResponseProcessor responseProcessor) {
+        public Builder<T> responseProcessor(IResponseProcessor responseProcessor) {
             this.responseProcessor = responseProcessor;
+            return this;
+        }
+
+        public Builder<T> retryCallback(RetryCallback<HttpPostRequest<T>> retryCallback) {
+            this.retryCallback = retryCallback;
             return this;
         }
 

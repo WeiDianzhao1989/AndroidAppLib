@@ -3,8 +3,8 @@ package com.koudai.net.toolbox;
 import android.text.TextUtils;
 
 import com.koudai.net.NetworkLibraryConstants;
-import com.koudai.net.callback.FileUploadCallback;
 import com.koudai.net.callback.ProgressCallback;
+import com.koudai.net.callback.RetryCallback;
 import com.koudai.net.kernal.Callback;
 import com.koudai.net.kernal.HttpUrl;
 import com.koudai.net.kernal.MediaType;
@@ -41,6 +41,7 @@ public final class FileUploadRequest<T> extends HttpRequest<T> {
         this.encodeCharset = Util.UTF_8;
         this.requestLevel = builder.requestLevel;
         this.callback = builder.callback;
+        this.retryCallback = builder.retryCallback;
         this.parser = builder.parser;
         this.priority = builder.priority;
 
@@ -153,13 +154,36 @@ public final class FileUploadRequest<T> extends HttpRequest<T> {
     }
 
 
+    public Builder<T> newBuilder() {
+
+        Builder<T> builder = new Builder<T>();
+        builder.url(this.url)
+                .headers(this.headers)
+                .params(this.params)
+                .callback(this.callback)
+                .parser(this.parser)
+                .uploadParts(this.uploadParts)
+                .requestLevel(this.requestLevel)
+                .retryTimesAfterFailed(this.maxRetryTimesAfterFailed)
+                .priority(this.priority)
+                .requestHeaderInterceptor(this.requestHeaderInterceptor)
+                .requestParamsInterceptor(this.requestParamsInterceptor)
+                .responseProcessor(this.responseProcessor)
+                .retryCallback(this.retryCallback)
+                .build();
+
+        return builder;
+    }
+
     public static final class Builder<T> {
         private String url;
         private RequestHeaders headers;
         private RequestParams params;
 
         private int requestLevel;
-        private FileUploadCallback<T> callback;
+        private com.koudai.net.callback.Callback<T> callback;
+        private RetryCallback<HttpPostRequest<T>> retryCallback;
+
         private Parser<T> parser;
         private List<UploadPart> uploadParts;
         private int retryTimesAfterFailed = -1;
@@ -190,7 +214,7 @@ public final class FileUploadRequest<T> extends HttpRequest<T> {
             return this;
         }
 
-        public Builder<T> callback(FileUploadCallback<T> callback) {
+        public Builder<T> callback(com.koudai.net.callback.Callback<T> callback) {
             this.callback = callback;
             return this;
         }
@@ -217,21 +241,25 @@ public final class FileUploadRequest<T> extends HttpRequest<T> {
             return this;
         }
 
-        public Builder requestHeaderInterceptor(IRequestHeaderInterceptor requestHeaderInterceptor) {
+        public Builder<T> requestHeaderInterceptor(IRequestHeaderInterceptor requestHeaderInterceptor) {
             this.requestHeaderInterceptor = requestHeaderInterceptor;
             return this;
         }
 
-        public Builder requestParamsInterceptor(IRequestParamsInterceptor requestParamsInterceptor) {
+        public Builder<T> requestParamsInterceptor(IRequestParamsInterceptor requestParamsInterceptor) {
             this.requestParamsInterceptor = requestParamsInterceptor;
             return this;
         }
 
-        public Builder responseProcessor(IResponseProcessor responseProcessor) {
+        public Builder<T> responseProcessor(IResponseProcessor responseProcessor) {
             this.responseProcessor = responseProcessor;
             return this;
         }
 
+        public Builder<T> retryCallback(RetryCallback<HttpPostRequest<T>> retryCallback) {
+            this.retryCallback = retryCallback;
+            return this;
+        }
 
         public FileUploadRequest<T> build() {
             return new FileUploadRequest<T>(this);

@@ -4,7 +4,7 @@ import android.net.Uri;
 import android.text.TextUtils;
 
 import com.koudai.net.NetworkLibraryConstants;
-import com.koudai.net.callback.FileDownloadCallback;
+import com.koudai.net.callback.RetryCallback;
 import com.koudai.net.kernal.Callback;
 import com.koudai.net.kernal.HttpUrl;
 import com.koudai.net.kernal.RequestBody;
@@ -38,6 +38,7 @@ public final class FileDownloadRequest extends HttpRequest<File> {
         this.encodeCharset = builder.encodeCharset;
         this.requestLevel = builder.requestLevel;
         this.callback = builder.callback;
+        this.retryCallback = builder.retryCallback;
         this.saveFileAbsolutelyPath = builder.saveFileAbsolutelyPath;
         this.isAutoResume = builder.isAutoResume;
         this.processor = builder.processor;
@@ -86,7 +87,7 @@ public final class FileDownloadRequest extends HttpRequest<File> {
 
             return httpUrlBuilder.build();
         } catch (UnsupportedEncodingException e) {
-            NetworkLog.getInstance().e(e.getMessage());
+
         }
 
 
@@ -174,6 +175,27 @@ public final class FileDownloadRequest extends HttpRequest<File> {
         return tag;
     }
 
+    public Builder newBuilder() {
+
+        Builder builder = new Builder();
+        builder.url(this.url)
+                .headers(this.headers)
+                .params(this.params)
+                .charset(this.encodeCharset)
+                .saveFileAbsolutelyPath(this.saveFileAbsolutelyPath)
+                .callback(this.callback)
+                .isAutoResume(this.isAutoResume)
+                .processor(this.processor)
+                .requestLevel(this.requestLevel)
+                .retryTimesAfterFailed(this.maxRetryTimesAfterFailed)
+                .priority(this.priority)
+                .requestHeaderInterceptor(this.requestHeaderInterceptor)
+                .requestParamsInterceptor(this.requestParamsInterceptor)
+                .retryCallback(this.retryCallback)
+                .build();
+
+        return builder;
+    }
 
     public static final class Builder {
         private String url;
@@ -182,7 +204,9 @@ public final class FileDownloadRequest extends HttpRequest<File> {
 
         private Charset encodeCharset = Util.UTF_8;
         private int requestLevel;
-        private FileDownloadCallback callback;
+        private com.koudai.net.callback.Callback<File> callback;
+        private RetryCallback<FileDownloadRequest> retryCallback;
+
         private FileDownloadProcessor processor;
         private String saveFileAbsolutelyPath;
         private int retryTimesAfterFailed = -1;
@@ -223,7 +247,7 @@ public final class FileDownloadRequest extends HttpRequest<File> {
             return this;
         }
 
-        public Builder callback(FileDownloadCallback callback) {
+        public Builder callback(com.koudai.net.callback.Callback<File> callback) {
             this.callback = callback;
             return this;
         }
@@ -257,6 +281,11 @@ public final class FileDownloadRequest extends HttpRequest<File> {
 
         public Builder requestParamsInterceptor(IRequestParamsInterceptor requestParamsInterceptor) {
             this.requestParamsInterceptor = requestParamsInterceptor;
+            return this;
+        }
+
+        public Builder retryCallback(RetryCallback<FileDownloadRequest> retryCallback) {
+            this.retryCallback = retryCallback;
             return this;
         }
 

@@ -46,13 +46,16 @@ class HttpRequestRunnable implements Runnable, Comparable<HttpRequestRunnable> {
     }
 
     protected void execute() {
-        do {
-            //1、保证每个请求都是在工作者线程，非UI线程执行
-            if (Looper.myLooper() == Looper.getMainLooper()) {
-                httpRequest.finish();
-                throw new IllegalStateException("shouldn't directly execute this method on UI");
-            }
 
+        //1、保证每个请求都是在工作者线程，非UI线程执行
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            httpRequest.finish();
+            throw new IllegalStateException("shouldn't directly execute this method on UI");
+        }
+
+        boolean isNeedRetry = false;
+
+        do {
             //2、检查手机网络是否开启
             if (!testNetworkConnection()) {
                 NetworkError error = new NetworkError(
@@ -62,6 +65,13 @@ class HttpRequestRunnable implements Runnable, Comparable<HttpRequestRunnable> {
                 );
                 DefaultResponseDelivery.getInstance().postError(httpRequest, error);
                 return;
+            }
+
+            if (isNeedRetry && httpRequest.retryCallback != null) { // 需要重试，给予一次回调修改request请求的机会
+                HttpRequest<?> newHttpRequest = httpRequest.retryCallback().onRetry(httpRequest);
+                if (newHttpRequest != null) {
+                    this.httpRequest = newHttpRequest;
+                }
             }
 
 
@@ -144,10 +154,11 @@ class HttpRequestRunnable implements Runnable, Comparable<HttpRequestRunnable> {
             // 11、创建内部网络调用过程
             httpRequestCall = createInternalCall(request);
             // 12、执行网络请求
-            boolean isNeedRetry = httpRequestCall.execute(responseCallback);
+            isNeedRetry = httpRequestCall.execute(responseCallback);
             if (!isNeedRetry) {
                 break;
             }
+            // 13、添加重试次数
             httpRequest.addRetryTimes();
         } while (httpRequest.retryTimes() < httpRequest.maxRetryTimesAfterFailed());
     }
@@ -193,15 +204,16 @@ class HttpRequestRunnable implements Runnable, Comparable<HttpRequestRunnable> {
         cancel(true);
     }
 
-    public void cancel(boolean isNotify) {
+    public void cancel(boolean isNotifyObserver) {
         if (!httpRequest.isFinished()) {
             httpRequest.markCancel();
-            if (httpRequestCall != null && !httpRequestCall.isCanceled()) {
-                httpRequestCall.cancel();
+
+            if (!isNotifyObserver) {
+                httpRequest.clearCallback();
             }
 
-            if (!isNotify) {
-                httpRequest.clearCallback();
+            if (httpRequestCall != null && !httpRequestCall.isCanceled()) {
+                httpRequestCall.cancel();
             }
         }
     }

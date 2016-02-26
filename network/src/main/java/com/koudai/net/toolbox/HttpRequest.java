@@ -1,6 +1,7 @@
 package com.koudai.net.toolbox;
 
 import com.koudai.net.callback.Callback;
+import com.koudai.net.callback.RetryCallback;
 import com.koudai.net.error.NetworkError;
 import com.koudai.net.kernal.HttpUrl;
 import com.koudai.net.kernal.RequestBody;
@@ -37,6 +38,7 @@ public abstract class HttpRequest<T> implements Comparable<HttpRequest<?>> {
 
     //响应回调相关
     protected Callback<T> callback;
+    protected RetryCallback retryCallback;
 
     private volatile T response;
     private volatile NetworkError error;
@@ -63,6 +65,11 @@ public abstract class HttpRequest<T> implements Comparable<HttpRequest<?>> {
     Callback<T> callback() {
         return callback;
     }
+
+    RetryCallback retryCallback() {
+        return retryCallback;
+    }
+
 
     int requestLevel() {
         return requestLevel;

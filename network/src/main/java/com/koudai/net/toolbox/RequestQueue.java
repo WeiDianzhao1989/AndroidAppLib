@@ -1,9 +1,13 @@
 package com.koudai.net.toolbox;
 
+import android.net.Uri;
 import android.os.Process;
+import android.text.TextUtils;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -21,7 +25,8 @@ import java.util.concurrent.TimeUnit;
  */
 final class RequestQueue {
 
-    private NetworkDispatcher[] dispatchers = new NetworkDispatcher[3];
+    //仿volley的四个分发请求线程，唯一不同的是，之后请求的实际执行另起线程
+    private NetworkRequestDispatcher[] dispatchers = new NetworkRequestDispatcher[4];
 
     // Singleton.
     private static class RequestQueueHolder {
@@ -32,14 +37,27 @@ final class RequestQueue {
         return RequestQueueHolder.instance;
     }
 
-    private final BlockingQueue<HttpRequestRunnable> networkQueue = new PriorityBlockingQueue<HttpRequestRunnable>(100);
     private final Map<String, Queue<HttpRequest<?>>> waitingRequests =
             new HashMap<String, Queue<HttpRequest<?>>>();
     private final Set<HttpRequest<?>> currentRequests = new HashSet<HttpRequest<?>>();
 
+    //减少并发请求，以便能更快
+    private final int maxRequests = 64;//总共允许64个并发请求
+    private final int maxRequestsPerHost = 10;//每个host允许10个并发请求
+
+    /**
+     * Ready async calls in the order they'll be run.
+     */
+    private final Deque<HttpRequestRunnable> readyAsyncCalls = new ArrayDeque<HttpRequestRunnable>();
+
+    /**
+     * Running asynchronous calls. Includes canceled calls that haven't finished yet.
+     */
+    private final BlockingQueue<HttpRequestRunnable> runningAsyncCalls = new PriorityBlockingQueue<HttpRequestRunnable>();
+
     public void start() {
         for (int i = 0; i < dispatchers.length; i++) {
-            dispatchers[i] = new NetworkDispatcher(networkQueue, currentRequests,
+            dispatchers[i] = new NetworkRequestDispatcher(runningAsyncCalls, currentRequests,
                     waitingRequests);
             dispatchers[i].start();
         }
@@ -53,9 +71,23 @@ final class RequestQueue {
      */
     public HttpRequestRunnable enqueue(HttpRequest<?> request) {
         request.setRequestQueue(this);
+
         HttpRequestRunnable requestRunnable = new HttpRequestRunnable(request);
-        networkQueue.offer(requestRunnable);
+
+        internalEnqueue(requestRunnable);
+
         return requestRunnable;
+    }
+
+    private void internalEnqueue(HttpRequestRunnable requestRunnable) {
+        synchronized (RequestQueue.this) {
+            if (runningAsyncCalls.size() < maxRequests
+                    && runningCallsForHost(requestRunnable) < maxRequestsPerHost) {
+                runningAsyncCalls.offer(requestRunnable);
+            } else {
+                readyAsyncCalls.add(requestRunnable);
+            }
+        }
     }
 
     public List<HttpRequestRunnable> enqueueAll(HttpRequest<?>... httpRequests) {
@@ -78,7 +110,7 @@ final class RequestQueue {
 
     public void stop() {
         for (int i = 0; i < dispatchers.length; i++) {
-            NetworkDispatcher dispatcher = dispatchers[i];
+            NetworkRequestDispatcher dispatcher = dispatchers[i];
             dispatcher.quit();
             dispatchers[i] = null;
         }
@@ -107,11 +139,50 @@ final class RequestQueue {
                     } else {
                         DefaultResponseDelivery.getInstance().postCancel(waitingRequest);
                     }
+                    runningAsyncCalls.remove(waitingRequest);
                 }
             }
         }
+
+        promoteCalls();
+
     }
 
+    /**
+     * 返回某个域名并发请求数
+     */
+    private int runningCallsForHost(HttpRequestRunnable call) {
+        int result = 0;
+        String host = Uri.parse(call.getHttpRequest().url()).getHost();
+        for (HttpRequestRunnable c : runningAsyncCalls) {
+            Uri uri = Uri.parse(c.getHttpRequest().url());
+            if (TextUtils.equals(host, uri.getHost())) {
+                result++;
+            }
+        }
+        return result;
+    }
+
+    /**
+     * 释放一个等待请求到运行队列里
+     */
+    private synchronized void promoteCalls() {
+        if (runningAsyncCalls.size() >= maxRequests) return; // Already running max capacity.
+        if (readyAsyncCalls.isEmpty()) return; // No ready calls to promote.
+
+        for (Iterator<HttpRequestRunnable> i = readyAsyncCalls.iterator(); i.hasNext(); ) {
+            HttpRequestRunnable call = i.next();
+
+            if (runningCallsForHost(call) < maxRequestsPerHost) {
+                i.remove();
+                if (!call.isCanceled()) {
+                    runningAsyncCalls.offer(call);
+                }
+            }
+
+            if (runningAsyncCalls.size() >= maxRequests) return; // Reached max capacity.
+        }
+    }
 
     private final class MultiHttpRequestCall implements Runnable {
 
@@ -149,15 +220,15 @@ final class RequestQueue {
 
                     for (HttpRequestRunnable main : mainTasks) {
                         CallDelegate delegate = new CallDelegate(main, watchDog);
-                        networkQueue.offer(delegate);
+                        internalEnqueue(delegate);
                     }
 
 
-                    boolean isMainTaskSuccess = watchDog.await((int)NetworkFetcherGlobalParams.getInstance().getWriteTimeout(), TimeUnit.SECONDS);
+                    boolean isMainTaskSuccess = watchDog.await((int) NetworkFetcherGlobalParams.getInstance().getWriteTimeout(), TimeUnit.SECONDS);
 
                     if (isMainTaskSuccess) {
                         for (HttpRequestRunnable minor : minorTasks) {
-                            networkQueue.offer(minor);
+                            internalEnqueue(minor);
                         }
                     }
 
@@ -211,8 +282,8 @@ final class RequestQueue {
         }
 
         @Override
-        public void cancel(boolean isNotify) {
-            this.delegate.cancel(isNotify);
+        public void cancel(boolean isNotifyObserver) {
+            this.delegate.cancel(isNotifyObserver);
         }
 
         @Override
