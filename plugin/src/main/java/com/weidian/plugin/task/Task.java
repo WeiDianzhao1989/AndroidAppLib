@@ -4,10 +4,6 @@ import com.weidian.plugin.task.pool.Priority;
 
 import java.util.concurrent.Executor;
 
-/**
- * @author: wyouflf
- * @date: 2014/11/11
- */
 public abstract class Task<ResultType> {
 
 	/*package*/ volatile State state = State.Null;

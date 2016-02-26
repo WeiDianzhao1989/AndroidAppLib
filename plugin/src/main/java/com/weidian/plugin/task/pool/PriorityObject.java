@@ -1,10 +1,5 @@
 package com.weidian.plugin.task.pool;
 
-/**
- * Author: wyouflf
- * Date: 14-5-16
- * Time: 上午11:25
- */
 public class PriorityObject<E> {
 
     public final Priority priority;

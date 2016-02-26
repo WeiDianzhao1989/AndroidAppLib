@@ -3,10 +3,6 @@ package com.weidian.plugin.task;
 import android.os.Looper;
 import android.util.Log;
 
-/**
- * @author: wyouflf
- * @date: 2014/11/12
- */
 public class TaskManager {
 
 	private TaskManager() {
