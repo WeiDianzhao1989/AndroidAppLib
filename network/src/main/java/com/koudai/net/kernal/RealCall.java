@@ -6,6 +6,7 @@ import com.koudai.net.kernal.internal.http.HttpEngine;
 import com.koudai.net.kernal.internal.http.RequestException;
 import com.koudai.net.kernal.internal.http.RouteException;
 import com.koudai.net.kernal.internal.http.StreamAllocation;
+import com.koudai.net.monitor.DeviceBandwidthSampler;
 import com.koudai.net.toolbox.ProgressResponseBody;
 
 import java.io.IOException;
@@ -73,17 +74,15 @@ final class RealCall implements Call {
         Response response = null;
         boolean signalledCallback = false;
         try {
-            client.dispatcher().executed(this);
             response = getResponseWithInterceptorChain(false);
             if (canceled) {
-                Request request = engine == null ? originalRequest : engine.getRequest();
                 if (response != null && response.body() != null) {
                     response.body().close();
                 }
-                responseCallback.onCancel(request);
+                responseCallback.onCancel(RealCall.this);
                 signalledCallback = true;
             } else {
-                responseCallback.onResponse(response);
+                responseCallback.onResponse(RealCall.this,response);
                 signalledCallback = true;
             }
         } catch (IOException e) {
@@ -91,21 +90,18 @@ final class RealCall implements Call {
                 // Do not signal the callback twice!
                 //logger.log(Level.INFO, "Callback failure for " + toLoggableString(), e);
             } else {
-                Request request = engine == null ? originalRequest : engine.getRequest();
                 if (!canceled) {
                     try {
-                        responseCallback.onFailure(request, e);
+                        responseCallback.onFailure(RealCall.this, e);
                     } catch (RetryException retry) {
                         isNeedRetry = true;
                     }
                 } else {
-                    responseCallback.onCancel(request);
+                    responseCallback.onCancel(RealCall.this);
                 }
             }
         } catch (RetryException e) {
             isNeedRetry = true;
-        } finally {
-            client.dispatcher().finished(this);
         }
 
         return isNeedRetry;
@@ -295,6 +291,7 @@ final class RealCall implements Call {
 
             boolean releaseConnection = true;
             try {
+                DeviceBandwidthSampler.getInstance().startSampling();
                 engine.sendRequest();
                 engine.readResponse();
                 releaseConnection = false;
@@ -328,6 +325,7 @@ final class RealCall implements Call {
                     StreamAllocation streamAllocation = engine.close();
                     streamAllocation.release();
                 }
+                DeviceBandwidthSampler.getInstance().stopSampling();
             }
 
             Response response = engine.getResponse();

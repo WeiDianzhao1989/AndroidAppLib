@@ -22,7 +22,8 @@ public final class HttpDate {
      */
     private static final ThreadLocal<DateFormat> STANDARD_DATE_FORMAT =
             new ThreadLocal<DateFormat>() {
-                @Override protected DateFormat initialValue() {
+                @Override
+                protected DateFormat initialValue() {
                     // RFC 2616 specified: RFC 822, updated by RFC 1123 format with fixed GMT.
                     DateFormat rfc1123 = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'", Locale.US);
                     rfc1123.setLenient(false);

@@ -20,7 +20,8 @@ public interface Dns {
    * lookup IP addresses. Most custom {@link Dns} implementations should delegate to this instance.
    */
   Dns SYSTEM = new Dns() {
-    @Override public List<InetAddress> lookup(String hostname) throws UnknownHostException {
+    @Override
+    public List<InetAddress> lookup(String hostname) throws UnknownHostException {
       if (hostname == null) throw new UnknownHostException("hostname == null");
       return Arrays.asList(InetAddress.getAllByName(hostname));
     }

@@ -15,7 +15,7 @@ public final class MediaType {
   private static final String QUOTED = "\"([^\"]*)\"";
   private static final Pattern TYPE_SUBTYPE = Pattern.compile(TOKEN + "/" + TOKEN);
   private static final Pattern PARAMETER = Pattern.compile(
-      ";\\s*(?:" + TOKEN + "=(?:" + TOKEN + "|" + QUOTED + "))?");
+          ";\\s*(?:" + TOKEN + "=(?:" + TOKEN + "|" + QUOTED + "))?");
 
   private final String mediaType;
   private final String type;
@@ -95,15 +95,18 @@ public final class MediaType {
    * Returns the encoded media type, like "text/plain; charset=utf-8",
    * appropriate for use in a Content-Type header.
    */
-  @Override public String toString() {
+  @Override
+  public String toString() {
     return mediaType;
   }
 
-  @Override public boolean equals(Object o) {
+  @Override
+  public boolean equals(Object o) {
     return o instanceof MediaType && ((MediaType) o).mediaType.equals(mediaType);
   }
 
-  @Override public int hashCode() {
+  @Override
+  public int hashCode() {
     return mediaType.hashCode();
   }
 }

@@ -14,7 +14,8 @@ class FaultHidingSink extends ForwardingSink {
     super(delegate);
   }
 
-  @Override public void write(Buffer source, long byteCount) throws IOException {
+  @Override
+  public void write(Buffer source, long byteCount) throws IOException {
     if (hasErrors) {
       source.skip(byteCount);
       return;
@@ -27,7 +28,8 @@ class FaultHidingSink extends ForwardingSink {
     }
   }
 
-  @Override public void flush() throws IOException {
+  @Override
+  public void flush() throws IOException {
     if (hasErrors) return;
     try {
       super.flush();
@@ -37,7 +39,8 @@ class FaultHidingSink extends ForwardingSink {
     }
   }
 
-  @Override public void close() throws IOException {
+  @Override
+  public void close() throws IOException {
     if (hasErrors) return;
     try {
       super.close();

@@ -1,15 +1,15 @@
 package com.koudai.net.toolbox;
 
-import android.support.v4.util.ArrayMap;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
  * Created by zhaoyu on 15/11/16.
  */
-public class RequestHeaders {
+public final class RequestHeaders {
 
-    private Map<String, String> headers = new ArrayMap<String, String>();
+    private Map<String, String> headers = new HashMap<String, String>();
 
 
     public void addHeader(String key, String value) {
@@ -31,7 +31,7 @@ public class RequestHeaders {
     }
 
     public Map<String, String> toMap() {
-        Map<String, String> headers = new ArrayMap<String, String>();
+        Map<String, String> headers = new HashMap<String, String>();
         for (Map.Entry<String, String> entry : this.headers.entrySet()) {
             headers.put(entry.getKey(), entry.getValue());
         }

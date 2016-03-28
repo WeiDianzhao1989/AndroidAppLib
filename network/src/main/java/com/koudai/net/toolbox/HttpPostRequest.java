@@ -9,7 +9,6 @@ import com.koudai.net.kernal.FormBody;
 import com.koudai.net.kernal.HttpUrl;
 import com.koudai.net.kernal.RequestBody;
 import com.koudai.net.kernal.internal.Util;
-import com.koudai.net.netutils.CollectionUtils;
 
 import java.nio.charset.Charset;
 import java.util.Map;
@@ -46,7 +45,7 @@ public final class HttpPostRequest<T> extends HttpRequest<T> {
                     builder.retryTimesAfterFailed;
         }
 
-        this.timestamp = System.currentTimeMillis();
+        this.requestStartTime = System.currentTimeMillis();
     }
 
     @Override
@@ -62,7 +61,6 @@ public final class HttpPostRequest<T> extends HttpRequest<T> {
     @Override
     protected RequestBody buildBody(Map<String, String> params) {
         FormBody.Builder formBodyBuilder = new FormBody.Builder();
-        //try {
         if (!CollectionUtils.isMapEmpty(params)) { //目前请求体不进行gzip压缩
             // 压入其他不需要加密的参数
             if (nonEncryptParams.toMap().size() > 0) {
@@ -75,17 +73,6 @@ public final class HttpPostRequest<T> extends HttpRequest<T> {
                 }
             }
         }
-
-        //}
-//        catch (UnsupportedEncodingException e) {
-//            if (this.params != null) {
-//                AppMonitorAgaent.reportError(new StringBuilder("encode request params error [").append(
-//                        this.params.toString())
-//                        .append("]").toString());
-//            } else {
-//                AppMonitorAgaent.reportError("encode request params error");
-//            }
-//        }
         return formBodyBuilder.build();
     }
 

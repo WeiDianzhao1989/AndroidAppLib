@@ -15,6 +15,6 @@ public abstract class JsonObjectListParser<T> implements Parser<List<T>> {
         return parseResponse((JSONArray) object);
     }
 
-    protected abstract  List<T> parseResponse(JSONArray object) throws JSONException;
+    protected abstract List<T> parseResponse(JSONArray object) throws JSONException;
 
 }

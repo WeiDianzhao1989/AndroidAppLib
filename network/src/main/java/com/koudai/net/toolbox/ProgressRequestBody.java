@@ -1,11 +1,7 @@
 package com.koudai.net.toolbox;
 
+import com.koudai.net.io.*;
 import com.koudai.net.callback.ProgressCallback;
-import com.koudai.net.io.Buffer;
-import com.koudai.net.io.BufferedSink;
-import com.koudai.net.io.ForwardingSink;
-import com.koudai.net.io.Okio;
-import com.koudai.net.io.Sink;
 import com.koudai.net.kernal.MediaType;
 import com.koudai.net.kernal.RequestBody;
 
@@ -15,7 +11,7 @@ import java.io.IOException;
  * Created by zhaoyu on 15/11/27.
  * 装饰一个可以查看请求体发送进度的RequestBody
  */
-public class ProgressRequestBody extends RequestBody {
+public final class ProgressRequestBody extends RequestBody {
 
     //实际的待包装请求体
     private final RequestBody requestBody;

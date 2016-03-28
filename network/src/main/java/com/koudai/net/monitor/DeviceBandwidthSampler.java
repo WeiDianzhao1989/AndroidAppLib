@@ -132,7 +132,15 @@ public class DeviceBandwidthSampler {
             super(looper);
             if (connectivity != null) {
                 if (connectivity.isConnectedMobile()) {
-                    sample_time = 1000 * 15;
+                    if (connectivity.isConnect2G()) {
+                        sample_time = 1000 * 10;
+                    } else if (connectivity.isConnect3G()) {
+                        sample_time = 1000 * 20;
+                    } else if (connectivity.isConnect4G()) {
+                        sample_time = 1000 * 25;
+                    } else {
+                        sample_time = 1000 * 15;
+                    }
                 } else if (connectivity.isConnectedWifi()) {
                     sample_time = 1000 * 60 * 5;
                 }

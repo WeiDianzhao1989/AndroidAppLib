@@ -46,15 +46,18 @@ public abstract class RequestBody {
   /** Returns a new request body that transmits {@code content}. */
   public static RequestBody create(final MediaType contentType, final ByteString content) {
     return new RequestBody() {
-      @Override public MediaType contentType() {
+      @Override
+      public MediaType contentType() {
         return contentType;
       }
 
-      @Override public long contentLength() throws IOException {
+      @Override
+      public long contentLength() throws IOException {
         return content.size();
       }
 
-      @Override public void writeTo(BufferedSink sink) throws IOException {
+      @Override
+      public void writeTo(BufferedSink sink) throws IOException {
         sink.write(content);
       }
     };
@@ -71,15 +74,18 @@ public abstract class RequestBody {
     if (content == null) throw new NullPointerException("content == null");
     Util.checkOffsetAndCount(content.length, offset, byteCount);
     return new RequestBody() {
-      @Override public MediaType contentType() {
+      @Override
+      public MediaType contentType() {
         return contentType;
       }
 
-      @Override public long contentLength() {
+      @Override
+      public long contentLength() {
         return byteCount;
       }
 
-      @Override public void writeTo(BufferedSink sink) throws IOException {
+      @Override
+      public void writeTo(BufferedSink sink) throws IOException {
         sink.write(content, offset, byteCount);
       }
     };
@@ -90,15 +96,18 @@ public abstract class RequestBody {
     if (file == null) throw new NullPointerException("content == null");
 
     return new RequestBody() {
-      @Override public MediaType contentType() {
+      @Override
+      public MediaType contentType() {
         return contentType;
       }
 
-      @Override public long contentLength() {
+      @Override
+      public long contentLength() {
         return file.length();
       }
 
-      @Override public void writeTo(BufferedSink sink) throws IOException {
+      @Override
+      public void writeTo(BufferedSink sink) throws IOException {
         Source source = null;
         try {
           source = Okio.source(file);

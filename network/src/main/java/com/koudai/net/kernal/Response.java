@@ -222,7 +222,8 @@ public final class Response {
     return result != null ? result : (cacheControl = CacheControl.parse(headers));
   }
 
-  @Override public String toString() {
+  @Override
+  public String toString() {
     return "Response{protocol="
             + protocol
             + ", code="

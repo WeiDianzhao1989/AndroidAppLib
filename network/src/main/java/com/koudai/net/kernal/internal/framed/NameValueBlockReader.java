@@ -1,12 +1,6 @@
 package com.koudai.net.kernal.internal.framed;
 
-import com.koudai.net.io.Buffer;
-import com.koudai.net.io.BufferedSource;
-import com.koudai.net.io.ByteString;
-import com.koudai.net.io.ForwardingSource;
-import com.koudai.net.io.InflaterSource;
-import com.koudai.net.io.Okio;
-import com.koudai.net.io.Source;
+import com.koudai.net.io.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -38,7 +32,8 @@ class NameValueBlockReader {
     // block. We cut the inflater off at its source because we can't predict the
     // ratio of compressed bytes to uncompressed bytes.
     Source throttleSource = new ForwardingSource(source) {
-      @Override public long read(Buffer sink, long byteCount) throws IOException {
+      @Override
+      public long read(Buffer sink, long byteCount) throws IOException {
         if (compressedLimit == 0) return -1; // Out of data for the current block.
         long read = super.read(sink, Math.min(byteCount, compressedLimit));
         if (read == -1) return -1;
@@ -49,7 +44,8 @@ class NameValueBlockReader {
 
     // Subclass inflater to install a dictionary when it's needed.
     Inflater inflater = new Inflater() {
-      @Override public int inflate(byte[] buffer, int offset, int count)
+      @Override
+      public int inflate(byte[] buffer, int offset, int count)
           throws DataFormatException {
         int result = super.inflate(buffer, offset, count);
         if (result == 0 && needsDictionary()) {

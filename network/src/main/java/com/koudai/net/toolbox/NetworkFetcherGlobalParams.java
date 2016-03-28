@@ -3,12 +3,11 @@ package com.koudai.net.toolbox;
 import android.content.Context;
 
 import com.koudai.net.NetworkLibraryConstants;
-import com.koudai.net.io.ByteArrayPool;
 
 /**
  * Created by zhaoyu on 15/12/25.
  */
-public class NetworkFetcherGlobalParams {
+public final class NetworkFetcherGlobalParams {
 
     private static final class NetworkFetcherGlobalParamsHolder {
         public static final NetworkFetcherGlobalParams instance = new NetworkFetcherGlobalParams();
@@ -21,13 +20,14 @@ public class NetworkFetcherGlobalParams {
     private IRequestHeaderInterceptor requestHeaderInterceptor;
     private IResponseProcessor responseProcessor;
 
+
     private long defaultConnectionTimeout = NetworkLibraryConstants.DEFAULT_CONNECT_TIMEOUT;
     private long defaultReadTimeout = NetworkLibraryConstants.DEFAULT_READ_TIMEOUT;
     private long defaultWriteTimeout = NetworkLibraryConstants.DEFAULT_WRITE_TIMEOUT;
 
-    private long connectionTimeout;
-    private long readTimeout;
-    private long writeTimeout;
+    private volatile long connectionTimeout;
+    private volatile long readTimeout;
+    private volatile long writeTimeout;
 
     private int maxRetryTimesAfterFailed;
 
@@ -71,6 +71,7 @@ public class NetworkFetcherGlobalParams {
     public void setResponseProcessor(IResponseProcessor responseProcessor) {
         this.responseProcessor = responseProcessor;
     }
+
 
     public long getConnectionTimeout() {
         return connectionTimeout == 0 ? defaultConnectionTimeout : connectionTimeout;

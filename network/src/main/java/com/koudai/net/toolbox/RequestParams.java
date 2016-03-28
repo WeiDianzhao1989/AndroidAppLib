@@ -1,21 +1,20 @@
 package com.koudai.net.toolbox;
 
-import android.support.v4.util.ArrayMap;
-
 import org.json.JSONArray;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
  * Created by zhaoyu on 15/11/16.
  */
-public class RequestParams {
+public final class RequestParams {
 
-    private Map<String, String> params = new ArrayMap<String, String>();
+    private Map<String, String> params = new HashMap<String, String>();
 
-    private Map<String, List<String>> multiParams = new ArrayMap<String, List<String>>();
+    private Map<String, List<String>> multiParams = new HashMap<String, List<String>>();
 
     public void addParam(String key, String value) {
         if (params.containsKey(key)) {
@@ -43,11 +42,15 @@ public class RequestParams {
     }
 
     public Map<String, String> toMap() {
-        Map<String, String> params = new ArrayMap<String, String>();
+        Map<String, String> params = new HashMap<String, String>();
         for (Map.Entry<String, String> entry : this.params.entrySet()) {
             params.put(entry.getKey(), entry.getValue());
         }
         return params;
+    }
+
+    public void putAll(Map<String, String> params) {
+        this.params.putAll(params);
     }
 
     @Override

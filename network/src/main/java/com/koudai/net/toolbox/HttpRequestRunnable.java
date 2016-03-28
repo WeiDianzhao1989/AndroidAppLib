@@ -1,8 +1,5 @@
 package com.koudai.net.toolbox;
 
-import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Looper;
 import android.os.Process;
 import android.text.TextUtils;
@@ -16,7 +13,6 @@ import com.koudai.net.kernal.HttpUrl;
 import com.koudai.net.kernal.OkHttpClient;
 import com.koudai.net.kernal.Request;
 import com.koudai.net.kernal.RequestBody;
-import com.koudai.net.netutils.CollectionUtils;
 
 import java.util.Map;
 
@@ -57,11 +53,11 @@ class HttpRequestRunnable implements Runnable, Comparable<HttpRequestRunnable> {
 
         do {
             //2、检查手机网络是否开启
-            if (!testNetworkConnection()) {
+            if (!NetUtil.testNetworkConnection()) {
                 NetworkError error = new NetworkError(
                         NetworkLibraryConstants.CONNECT_FAILED_ERROR,
                         NetworkLibraryConstants.CONNECT_FAILED_ERROR,
-                        "手机无网络链接"
+                        "network connection failed"
                 );
                 DefaultResponseDelivery.getInstance().postError(httpRequest, error);
                 return;
@@ -119,7 +115,8 @@ class HttpRequestRunnable implements Runnable, Comparable<HttpRequestRunnable> {
             // 6、构建请求的Url
             HttpUrl httpUrl = httpRequest.buildUrl(finalParams);
 
-            if (httpUrl == null) throw new IllegalStateException("build url failed,please check url or params");
+            if (httpUrl == null)
+                throw new IllegalStateException("build url failed,please check url or params");
 
             logSb.setLength(0);
             logSb.append("get request final url is [").append(httpUrl.toString()).append("]");
@@ -172,18 +169,6 @@ class HttpRequestRunnable implements Runnable, Comparable<HttpRequestRunnable> {
         }
     }
 
-    /**
-     * 测试是否有网络链接
-     *
-     * @return
-     */
-    private boolean testNetworkConnection() {
-        ConnectivityManager cm =
-                (ConnectivityManager) NetworkFetcherGlobalParams.getInstance().getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo netInfo = cm.getActiveNetworkInfo();
-        return netInfo != null && netInfo.isConnectedOrConnecting();
-    }
-
     public HttpRequest<?> getHttpRequest() {
         return httpRequest;
     }
@@ -204,6 +189,11 @@ class HttpRequestRunnable implements Runnable, Comparable<HttpRequestRunnable> {
         cancel(true);
     }
 
+    /**
+     * 取消请求
+     *
+     * @param isNotifyObserver 是否通知外界取消操作
+     */
     public void cancel(boolean isNotifyObserver) {
         if (!httpRequest.isFinished()) {
             httpRequest.markCancel();

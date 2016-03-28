@@ -7,7 +7,6 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
-import java.util.concurrent.BlockingQueue;
 
 /**
  * Created by zhaoyu on 15/12/25.
@@ -15,19 +14,21 @@ import java.util.concurrent.BlockingQueue;
  */
 final class NetworkRequestDispatcher extends Thread {
 
-    private final BlockingQueue<HttpRequestRunnable> networkQueue;
+    private RequestQueueLock queueLock;
+    private final Queue<HttpRequestRunnable> networkQueue;
     private final Map<String, Queue<HttpRequest<?>>> waitingRequests;
-    private final Set<HttpRequest<?>> currentRequest;
+    private final Set<HttpRequest<?>> currentRunningRequests;
 
     private volatile boolean mQuit = false;
 
-
-    public NetworkRequestDispatcher(BlockingQueue<HttpRequestRunnable> networkQueue,
-                                    Set<HttpRequest<?>> currentRequest,
-                                    Map<String, Queue<HttpRequest<?>>> waitingRequests) {
+    public NetworkRequestDispatcher(RequestQueueLock queueLock,
+                                    Queue<HttpRequestRunnable> networkQueue,
+                                    Map<String, Queue<HttpRequest<?>>> waitingRequests,
+                                    Set<HttpRequest<?>> currentRunningRequests) {
+        this.queueLock = queueLock;
         this.networkQueue = networkQueue;
-        this.currentRequest = currentRequest;
         this.waitingRequests = waitingRequests;
+        this.currentRunningRequests = currentRunningRequests;
     }
 
     public void quit() {
@@ -44,18 +45,43 @@ final class NetworkRequestDispatcher extends Thread {
             try {
 
                 //从请求队列，取出请求
-                requestRunnable = networkQueue.take();
+                try {
+                    queueLock.lock();
+                    while (true) {
+                        requestRunnable = networkQueue.poll();
+                        if (requestRunnable == null) {
+                            queueLock.waitFor();
+                        } else {
+                            break;
+                        }
+                    }
+                } finally {
+                    queueLock.unlock();
+                }
 
-                //添加到表示正在进行请求的集合中
-                synchronized (currentRequest) {
-                    currentRequest.add(requestRunnable.getHttpRequest());
+
+                HttpRequest<?> httpRequest = requestRunnable.getHttpRequest();
+
+                HttpRequest<?> currentRequest = null;
+
+                synchronized (currentRunningRequests) {
+                    for (HttpRequest<?> request : currentRunningRequests) {
+                        if (request.tag().equalsIgnoreCase(httpRequest.tag())) {
+                            currentRequest = request;
+                        }
+                    }
+                    //添加到表示正在进行请求的集合中
+                    if (currentRunningRequests.contains(httpRequest)) {
+                        currentRunningRequests.add(httpRequest);
+                    }
                 }
 
                 //合并同一个请求
                 synchronized (waitingRequests) {
 
                     String tag = requestRunnable.getHttpRequest().tag();
-                    if (waitingRequests.containsKey(tag)) {
+                    if (waitingRequests.containsKey(tag)
+                            && (currentRequest != null && !currentRequest.isCanceled())) {
                         Queue<HttpRequest<?>> stagedRequests = waitingRequests.get(tag);
                         if (stagedRequests == null) {
                             stagedRequests = new LinkedList<HttpRequest<?>>();
@@ -70,6 +96,7 @@ final class NetworkRequestDispatcher extends Thread {
                     }
                 }
             } catch (InterruptedException e) {
+                NetworkLog.getInstance().e(e.getMessage());
                 if (mQuit) {
                     return;
                 }

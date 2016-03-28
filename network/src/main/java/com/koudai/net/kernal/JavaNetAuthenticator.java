@@ -14,7 +14,8 @@ import java.util.List;
  * OkHttpClient.Builder#proxyAuthenticator(Authenticator)}.
  */
 public final class JavaNetAuthenticator implements Authenticator {
-    @Override public Request authenticate(Route route, Response response) throws IOException {
+    @Override
+    public Request authenticate(Route route, Response response) throws IOException {
         List<Challenge> challenges = response.challenges();
         Request request = response.request();
         HttpUrl url = request.url();

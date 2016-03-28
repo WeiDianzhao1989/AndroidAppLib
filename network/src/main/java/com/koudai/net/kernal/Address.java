@@ -20,7 +20,7 @@ import static com.koudai.net.kernal.internal.Util.equal;
  * proxy} is explicitly requested), this also includes that proxy information. For secure
  * connections the address also includes the SSL socket factory, hostname verifier, and certificate
  * pinner.
- *
+ * <p/>
  * <p>HTTP requests that share the same {@code Address} may also share the same {@link Connection}.
  */
 public final class Address {
@@ -46,24 +46,24 @@ public final class Address {
                 .port(uriPort)
                 .build();
 
-        if (dns == null) throw new IllegalArgumentException("dns == null");
+        if (dns == null) throw new NullPointerException("dns == null");
         this.dns = dns;
 
-        if (socketFactory == null) throw new IllegalArgumentException("socketFactory == null");
+        if (socketFactory == null) throw new NullPointerException("socketFactory == null");
         this.socketFactory = socketFactory;
 
         if (proxyAuthenticator == null) {
-            throw new IllegalArgumentException("proxyAuthenticator == null");
+            throw new NullPointerException("proxyAuthenticator == null");
         }
         this.proxyAuthenticator = proxyAuthenticator;
 
-        if (protocols == null) throw new IllegalArgumentException("protocols == null");
+        if (protocols == null) throw new NullPointerException("protocols == null");
         this.protocols = Util.immutableList(protocols);
 
-        if (connectionSpecs == null) throw new IllegalArgumentException("connectionSpecs == null");
+        if (connectionSpecs == null) throw new NullPointerException("connectionSpecs == null");
         this.connectionSpecs = Util.immutableList(connectionSpecs);
 
-        if (proxySelector == null) throw new IllegalArgumentException("proxySelector == null");
+        if (proxySelector == null) throw new NullPointerException("proxySelector == null");
         this.proxySelector = proxySelector;
 
         this.proxy = proxy;
@@ -80,17 +80,23 @@ public final class Address {
         return url;
     }
 
-    /** Returns the service that will be used to resolve IP addresses for hostnames. */
+    /**
+     * Returns the service that will be used to resolve IP addresses for hostnames.
+     */
     public Dns dns() {
         return dns;
     }
 
-    /** Returns the socket factory for new connections. */
+    /**
+     * Returns the socket factory for new connections.
+     */
     public SocketFactory socketFactory() {
         return socketFactory;
     }
 
-    /** Returns the client's proxy authenticator. */
+    /**
+     * Returns the client's proxy authenticator.
+     */
     public Authenticator proxyAuthenticator() {
         return proxyAuthenticator;
     }
@@ -123,22 +129,29 @@ public final class Address {
         return proxy;
     }
 
-    /** Returns the SSL socket factory, or null if this is not an HTTPS address. */
+    /**
+     * Returns the SSL socket factory, or null if this is not an HTTPS address.
+     */
     public SSLSocketFactory sslSocketFactory() {
         return sslSocketFactory;
     }
 
-    /** Returns the hostname verifier, or null if this is not an HTTPS address. */
+    /**
+     * Returns the hostname verifier, or null if this is not an HTTPS address.
+     */
     public HostnameVerifier hostnameVerifier() {
         return hostnameVerifier;
     }
 
-    /** Returns this address's certificate pinner, or null if this is not an HTTPS address. */
+    /**
+     * Returns this address's certificate pinner, or null if this is not an HTTPS address.
+     */
     public CertificatePinner certificatePinner() {
         return certificatePinner;
     }
 
-    @Override public boolean equals(Object other) {
+    @Override
+    public boolean equals(Object other) {
         if (other instanceof Address) {
             Address that = (Address) other;
             return this.url.equals(that.url)
@@ -155,7 +168,8 @@ public final class Address {
         return false;
     }
 
-    @Override public int hashCode() {
+    @Override
+    public int hashCode() {
         int result = 17;
         result = 31 * result + url.hashCode();
         result = 31 * result + dns.hashCode();
@@ -170,3 +184,4 @@ public final class Address {
         return result;
     }
 }
+

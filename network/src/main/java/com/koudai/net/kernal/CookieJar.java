@@ -19,10 +19,12 @@ import java.util.List;
 public interface CookieJar {
     /** A cookie jar that never accepts any cookies. */
     CookieJar NO_COOKIES = new CookieJar() {
-        @Override public void saveFromResponse(HttpUrl url, List<Cookie> cookies) {
+        @Override
+        public void saveFromResponse(HttpUrl url, List<Cookie> cookies) {
         }
 
-        @Override public List<Cookie> loadForRequest(HttpUrl url) {
+        @Override
+        public List<Cookie> loadForRequest(HttpUrl url) {
             return Collections.emptyList();
         }
     };

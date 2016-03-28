@@ -239,7 +239,8 @@ public final class CacheControl {
             mustRevalidate, maxStaleSeconds, minFreshSeconds, onlyIfCached, noTransform, headerValue);
   }
 
-  @Override public String toString() {
+  @Override
+  public String toString() {
     String result = headerValue;
     return result != null ? result : (headerValue = headerValue());
   }

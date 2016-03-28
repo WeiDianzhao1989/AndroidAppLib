@@ -77,7 +77,8 @@ public enum Protocol {
    * Returns the string used to identify this protocol for ALPN, like
    * "http/1.1", "spdy/3.1" or "h2".
    */
-  @Override public String toString() {
+  @Override
+  public String toString() {
     return protocol;
   }
 }

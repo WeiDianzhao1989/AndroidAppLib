@@ -64,7 +64,8 @@ public final class Route {
     return address.sslSocketFactory != null && proxy.type() == Proxy.Type.HTTP;
   }
 
-  @Override public boolean equals(Object obj) {
+  @Override
+  public boolean equals(Object obj) {
     if (obj instanceof Route) {
       Route other = (Route) obj;
       return address.equals(other.address)
@@ -74,7 +75,8 @@ public final class Route {
     return false;
   }
 
-  @Override public int hashCode() {
+  @Override
+  public int hashCode() {
     int result = 17;
     result = 31 * result + address.hashCode();
     result = 31 * result + proxy.hashCode();

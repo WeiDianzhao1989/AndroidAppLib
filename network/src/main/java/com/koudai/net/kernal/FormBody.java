@@ -44,15 +44,18 @@ public final class FormBody extends RequestBody {
         return percentDecode(encodedValue(index), true);
     }
 
-    @Override public MediaType contentType() {
+    @Override
+    public MediaType contentType() {
         return CONTENT_TYPE;
     }
 
-    @Override public long contentLength() {
+    @Override
+    public long contentLength() {
         return writeOrCountBytes(null, true);
     }
 
-    @Override public void writeTo(BufferedSink sink) throws IOException {
+    @Override
+    public void writeTo(BufferedSink sink) throws IOException {
         writeOrCountBytes(sink, false);
     }
 

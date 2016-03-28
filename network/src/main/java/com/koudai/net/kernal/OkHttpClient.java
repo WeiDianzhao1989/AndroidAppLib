@@ -5,10 +5,12 @@ import com.koudai.net.callback.ProgressCallback;
 import com.koudai.net.kernal.internal.Dns;
 import com.koudai.net.kernal.internal.Internal;
 import com.koudai.net.kernal.internal.InternalCache;
+import com.koudai.net.kernal.internal.Platform;
 import com.koudai.net.kernal.internal.RouteDatabase;
 import com.koudai.net.kernal.internal.Util;
 import com.koudai.net.kernal.internal.http.StreamAllocation;
 import com.koudai.net.kernal.internal.io.RealConnection;
+import com.koudai.net.kernal.internal.tls.CertificateChainCleaner;
 import com.koudai.net.kernal.internal.tls.OkHostnameVerifier;
 
 import java.net.MalformedURLException;
@@ -25,6 +27,7 @@ import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.X509TrustManager;
 
 /**
  * Factory for {@linkplain Call calls}, which can be used to send HTTP requests and read their
@@ -44,7 +47,7 @@ import javax.net.ssl.SSLSocketFactory;
  *   Response response = clientWith30sTimeout.newCall(request).execute();
  * }</pre>
  */
-public final class OkHttpClient implements Cloneable, Call.Factory {
+public class OkHttpClient implements Cloneable, Call.Factory {
     private static final List<Protocol> DEFAULT_PROTOCOLS = Util.immutableList(
             Protocol.HTTP_2, Protocol.SPDY_3, Protocol.HTTP_1_1);
 
@@ -53,37 +56,45 @@ public final class OkHttpClient implements Cloneable, Call.Factory {
 
     static {
         Internal.instance = new Internal() {
-            @Override public void addLenient(Headers.Builder builder, String line) {
+            @Override
+            public void addLenient(Headers.Builder builder, String line) {
                 builder.addLenient(line);
             }
 
-            @Override public void addLenient(Headers.Builder builder, String name, String value) {
+            @Override
+            public void addLenient(Headers.Builder builder, String name, String value) {
                 builder.addLenient(name, value);
             }
 
-            @Override public void setCache(OkHttpClient.Builder builder, InternalCache internalCache) {
+            @Override
+            public void setCache(OkHttpClient.Builder builder, InternalCache internalCache) {
                 builder.setInternalCache(internalCache);
             }
 
-            @Override public InternalCache internalCache(OkHttpClient client) {
+            @Override
+            public InternalCache internalCache(OkHttpClient client) {
                 return client.internalCache();
             }
 
-            @Override public boolean connectionBecameIdle(
+            @Override
+            public boolean connectionBecameIdle(
                     ConnectionPool pool, RealConnection connection) {
                 return pool.connectionBecameIdle(connection);
             }
 
-            @Override public RealConnection get(
+            @Override
+            public RealConnection get(
                     ConnectionPool pool, Address address, StreamAllocation streamAllocation) {
                 return pool.get(address, streamAllocation);
             }
 
-            @Override public void put(ConnectionPool pool, RealConnection connection) {
+            @Override
+            public void put(ConnectionPool pool, RealConnection connection) {
                 pool.put(connection);
             }
 
-            @Override public RouteDatabase routeDatabase(ConnectionPool connectionPool) {
+            @Override
+            public RouteDatabase routeDatabase(ConnectionPool connectionPool) {
                 return connectionPool.routeDatabase;
             }
 
@@ -92,7 +103,8 @@ public final class OkHttpClient implements Cloneable, Call.Factory {
 //                ((RealCall) call).enqueue(responseCallback, forWebSocket);
 //            }
 
-            @Override public StreamAllocation callEngineGetStreamAllocation(Call call) {
+            @Override
+            public StreamAllocation callEngineGetStreamAllocation(Call call) {
                 return ((RealCall) call).engine.streamAllocation;
             }
 
@@ -101,7 +113,8 @@ public final class OkHttpClient implements Cloneable, Call.Factory {
                 tlsConfiguration.apply(sslSocket, isFallback);
             }
 
-            @Override public HttpUrl getHttpUrlChecked(String url)
+            @Override
+            public HttpUrl getHttpUrlChecked(String url)
                     throws MalformedURLException, UnknownHostException {
                 return HttpUrl.getChecked(url);
             }
@@ -120,6 +133,7 @@ public final class OkHttpClient implements Cloneable, Call.Factory {
     final InternalCache internalCache;
     final SocketFactory socketFactory;
     final SSLSocketFactory sslSocketFactory;
+    final CertificateChainCleaner certificateChainCleaner;
     final HostnameVerifier hostnameVerifier;
     final CertificatePinner certificatePinner;
     final Authenticator proxyAuthenticator;
@@ -149,7 +163,13 @@ public final class OkHttpClient implements Cloneable, Call.Factory {
         this.cache = builder.cache;
         this.internalCache = builder.internalCache;
         this.socketFactory = builder.socketFactory;
-        if (builder.sslSocketFactory != null) {
+
+        boolean isTLS = false;
+        for (ConnectionSpec spec : connectionSpecs) {
+            isTLS = isTLS || spec.isTls();
+        }
+
+        if (builder.sslSocketFactory != null || !isTLS) {
             this.sslSocketFactory = builder.sslSocketFactory;
         } else {
             try {
@@ -160,8 +180,21 @@ public final class OkHttpClient implements Cloneable, Call.Factory {
                 throw new AssertionError(); // The system has no TLS. Just give up.
             }
         }
+        if (sslSocketFactory != null && builder.certificateChainCleaner == null) {
+            X509TrustManager trustManager = Platform.get().trustManager(sslSocketFactory);
+            if (trustManager == null) {
+                throw new IllegalStateException("Unable to extract the trust manager on " + Platform.get()
+                        + ", sslSocketFactory is " + sslSocketFactory.getClass());
+            }
+            this.certificateChainCleaner = CertificateChainCleaner.get(trustManager);
+            this.certificatePinner = builder.certificatePinner.newBuilder()
+                    .certificateChainCleaner(certificateChainCleaner)
+                    .build();
+        } else {
+            this.certificateChainCleaner = builder.certificateChainCleaner;
+            this.certificatePinner = builder.certificatePinner;
+        }
         this.hostnameVerifier = builder.hostnameVerifier;
-        this.certificatePinner = builder.certificatePinner;
         this.proxyAuthenticator = builder.proxyAuthenticator;
         this.authenticator = builder.authenticator;
         this.connectionPool = builder.connectionPool;
@@ -286,7 +319,8 @@ public final class OkHttpClient implements Cloneable, Call.Factory {
     /**
      * Prepares the {@code request} to be executed at some point in the future.
      */
-    @Override public Call newCall(Request request) {
+    @Override
+    public Call newCall(Request request) {
         return new RealCall(this, request);
     }
 
@@ -311,6 +345,7 @@ public final class OkHttpClient implements Cloneable, Call.Factory {
         InternalCache internalCache;
         SocketFactory socketFactory;
         SSLSocketFactory sslSocketFactory;
+        CertificateChainCleaner certificateChainCleaner;
         HostnameVerifier hostnameVerifier;
         CertificatePinner certificatePinner;
         Authenticator proxyAuthenticator;
@@ -358,6 +393,7 @@ public final class OkHttpClient implements Cloneable, Call.Factory {
             this.cache = okHttpClient.cache;
             this.socketFactory = okHttpClient.socketFactory;
             this.sslSocketFactory = okHttpClient.sslSocketFactory;
+            this.certificateChainCleaner = okHttpClient.certificateChainCleaner;
             this.hostnameVerifier = okHttpClient.hostnameVerifier;
             this.certificatePinner = okHttpClient.certificatePinner;
             this.proxyAuthenticator = okHttpClient.proxyAuthenticator;
@@ -379,7 +415,7 @@ public final class OkHttpClient implements Cloneable, Call.Factory {
          */
         public Builder connectTimeout(long timeout, TimeUnit unit) {
             if (timeout < 0) throw new IllegalArgumentException("timeout < 0");
-            if (unit == null) throw new IllegalArgumentException("unit == null");
+            if (unit == null) throw new NullPointerException("unit == null");
             long millis = unit.toMillis(timeout);
             if (millis > Integer.MAX_VALUE) throw new IllegalArgumentException("Timeout too large.");
             if (millis == 0 && timeout > 0) throw new IllegalArgumentException("Timeout too small.");
@@ -393,7 +429,7 @@ public final class OkHttpClient implements Cloneable, Call.Factory {
          */
         public Builder readTimeout(long timeout, TimeUnit unit) {
             if (timeout < 0) throw new IllegalArgumentException("timeout < 0");
-            if (unit == null) throw new IllegalArgumentException("unit == null");
+            if (unit == null) throw new NullPointerException("unit == null");
             long millis = unit.toMillis(timeout);
             if (millis > Integer.MAX_VALUE) throw new IllegalArgumentException("Timeout too large.");
             if (millis == 0 && timeout > 0) throw new IllegalArgumentException("Timeout too small.");
@@ -407,7 +443,7 @@ public final class OkHttpClient implements Cloneable, Call.Factory {
          */
         public Builder writeTimeout(long timeout, TimeUnit unit) {
             if (timeout < 0) throw new IllegalArgumentException("timeout < 0");
-            if (unit == null) throw new IllegalArgumentException("unit == null");
+            if (unit == null) throw new NullPointerException("unit == null");
             long millis = unit.toMillis(timeout);
             if (millis > Integer.MAX_VALUE) throw new IllegalArgumentException("Timeout too large.");
             if (millis == 0 && timeout > 0) throw new IllegalArgumentException("Timeout too small.");
@@ -495,6 +531,7 @@ public final class OkHttpClient implements Cloneable, Call.Factory {
         public Builder sslSocketFactory(SSLSocketFactory sslSocketFactory) {
             if (sslSocketFactory == null) throw new NullPointerException("sslSocketFactory == null");
             this.sslSocketFactory = sslSocketFactory;
+            this.certificateChainCleaner = null;
             return this;
         }
 

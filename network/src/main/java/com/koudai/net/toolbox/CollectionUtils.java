@@ -1,7 +1,7 @@
-package com.koudai.net.netutils;
+package com.koudai.net.toolbox;
 
-import android.support.v4.util.ArrayMap;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -10,7 +10,7 @@ import java.util.Map;
  */
 public final class CollectionUtils {
 
-    public static final Map<String,String> EMPTY_STRING_MAP = new ArrayMap<String, String>();
+    public static final Map<String,String> EMPTY_STRING_MAP = new HashMap<String, String>();
 
     public static boolean isMapEmpty(Map<?, ?> map) {
 

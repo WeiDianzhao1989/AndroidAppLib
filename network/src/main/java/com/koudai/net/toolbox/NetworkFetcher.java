@@ -1,7 +1,5 @@
 package com.koudai.net.toolbox;
 
-import com.koudai.net.netutils.ProcessUtils;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -20,6 +18,9 @@ public final class NetworkFetcher {
         public static final NetworkFetcher instance = new NetworkFetcher();
     }
 
+    private NetworkFetcher() {
+    }
+
     public static NetworkFetcher getInstance() {
         return NetworkFetcherHolder.instance;
     }
@@ -29,10 +30,11 @@ public final class NetworkFetcher {
      */
     public void initNetwork(NetworkFetcherConfiguration configuration) {
 
-        if(configuration.getContext() == null) throw new IllegalArgumentException("please supply android application context!");
+        if (configuration.getContext() == null)
+            throw new IllegalArgumentException("please supply android application context!");
 
         if (ProcessUtils.isMainProcess(configuration.getContext())) {
-
+            NetworkLog.getInstance().setLogger(configuration.isLogger());
             NetworkFetcherGlobalParams.getInstance().setContext(configuration.getContext().getApplicationContext());
 
             NetworkFetcherGlobalParams.getInstance().setRequestParamsInterceptor(configuration.getRequestParamsInterceptor());

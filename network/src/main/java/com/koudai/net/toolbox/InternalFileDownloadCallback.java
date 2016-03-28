@@ -2,15 +2,15 @@ package com.koudai.net.toolbox;
 
 import android.text.TextUtils;
 
+import com.koudai.net.io.BufferedSink;
+import com.koudai.net.io.BufferedSource;
+import com.koudai.net.io.Okio;
 import com.koudai.net.NetworkLibraryConstants;
 import com.koudai.net.error.DownloadException;
 import com.koudai.net.error.NetworkError;
 import com.koudai.net.error.RetryException;
-import com.koudai.net.io.BufferedSink;
-import com.koudai.net.io.BufferedSource;
-import com.koudai.net.io.Okio;
+import com.koudai.net.kernal.Call;
 import com.koudai.net.kernal.Callback;
-import com.koudai.net.kernal.Request;
 import com.koudai.net.kernal.Response;
 import com.koudai.net.kernal.ResponseBody;
 import com.koudai.net.toolbox.processor.FileDownloadProcessor;
@@ -37,7 +37,7 @@ final class InternalFileDownloadCallback implements Callback {
     }
 
     @Override
-    public void onFailure(Request request, IOException e) throws RetryException {
+    public void onFailure(Call call, IOException e) throws RetryException {
         if (fileDownloadRequest.retryTimes()
                 < fileDownloadRequest.maxRetryTimesAfterFailed()) {
             if (e instanceof SocketTimeoutException) {//socket 连接，读写超时重试
@@ -51,7 +51,7 @@ final class InternalFileDownloadCallback implements Callback {
     }
 
     @Override
-    public void onResponse(Response response) throws IOException, RetryException {
+    public void onResponse(Call call, Response response) throws IOException, RetryException {
         boolean isDownloadSuccess = false;
         try {
             if (!TextUtils.isEmpty(fileDownloadRequest.saveFileAbsolutelyPath())) {
@@ -135,9 +135,10 @@ final class InternalFileDownloadCallback implements Callback {
     }
 
     @Override
-    public void onCancel(Request request) {
+    public void onCancel(Call call) {
+        log.setLength(0);
+        log.append("file download ").append(fileDownloadRequest.url()).append(" has been canceled");
         DefaultResponseDelivery.getInstance().postCancel(fileDownloadRequest);
-
     }
 
 

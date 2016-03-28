@@ -16,6 +16,7 @@ import com.koudai.net.kernal.internal.http.RetryableSink;
 import com.koudai.net.kernal.internal.http.RouteException;
 import com.koudai.net.kernal.internal.http.StatusLine;
 import com.koudai.net.kernal.internal.http.StreamAllocation;
+import com.koudai.net.monitor.DeviceBandwidthSampler;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -27,6 +28,7 @@ import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.Proxy;
+import java.net.ProxySelector;
 import java.net.SocketPermission;
 import java.net.URL;
 import java.net.UnknownHostException;
@@ -82,12 +84,20 @@ public class HttpURLConnectionImpl extends HttpURLConnection {
      */
     Handshake handshake;
 
+    private URLFilter urlFilter;
+
     public HttpURLConnectionImpl(URL url, OkHttpClient client) {
         super(url);
         this.client = client;
     }
 
-    @Override public final void connect() throws IOException {
+    public HttpURLConnectionImpl(URL url, OkHttpClient client, URLFilter urlFilter) {
+        this(url, client);
+        this.urlFilter = urlFilter;
+    }
+
+    @Override
+    public final void connect() throws IOException {
         initHttpEngine();
         boolean success;
         do {
@@ -95,7 +105,8 @@ public class HttpURLConnectionImpl extends HttpURLConnection {
         } while (!success);
     }
 
-    @Override public final void disconnect() {
+    @Override
+    public final void disconnect() {
         // Calling disconnect() before a connection exists should have no effect.
         if (httpEngine == null) return;
 
@@ -112,7 +123,8 @@ public class HttpURLConnectionImpl extends HttpURLConnection {
      * Returns an input stream from the server in the case of error such as the requested file (txt,
      * htm, html) is not found on the remote server.
      */
-    @Override public final InputStream getErrorStream() {
+    @Override
+    public final InputStream getErrorStream() {
         try {
             HttpEngine response = getResponse();
             if (HttpEngine.hasBody(response.getResponse())
@@ -154,7 +166,8 @@ public class HttpURLConnectionImpl extends HttpURLConnection {
      * Returns the value of the field at {@code position}. Returns null if there are fewer than {@code
      * position} headers.
      */
-    @Override public final String getHeaderField(int position) {
+    @Override
+    public final String getHeaderField(int position) {
         try {
             Headers headers = getHeaders();
             if (position < 0 || position >= headers.size()) return null;
@@ -168,7 +181,8 @@ public class HttpURLConnectionImpl extends HttpURLConnection {
      * Returns the value of the field corresponding to the {@code fieldName}, or null if there is no
      * such field. If the field has multiple values, the last value is returned.
      */
-    @Override public final String getHeaderField(String fieldName) {
+    @Override
+    public final String getHeaderField(String fieldName) {
         try {
             return fieldName == null
                     ? StatusLine.get(getResponse().getResponse()).toString()
@@ -178,7 +192,8 @@ public class HttpURLConnectionImpl extends HttpURLConnection {
         }
     }
 
-    @Override public final String getHeaderFieldKey(int position) {
+    @Override
+    public final String getHeaderFieldKey(int position) {
         try {
             Headers headers = getHeaders();
             if (position < 0 || position >= headers.size()) return null;
@@ -188,7 +203,8 @@ public class HttpURLConnectionImpl extends HttpURLConnection {
         }
     }
 
-    @Override public final Map<String, List<String>> getHeaderFields() {
+    @Override
+    public final Map<String, List<String>> getHeaderFields() {
         try {
             return JavaNetHeaders.toMultimap(getHeaders(),
                     StatusLine.get(getResponse().getResponse()).toString());
@@ -197,7 +213,8 @@ public class HttpURLConnectionImpl extends HttpURLConnection {
         }
     }
 
-    @Override public final Map<String, List<String>> getRequestProperties() {
+    @Override
+    public final Map<String, List<String>> getRequestProperties() {
         if (connected) {
             throw new IllegalStateException(
                     "Cannot access request header fields after connection is set");
@@ -206,7 +223,8 @@ public class HttpURLConnectionImpl extends HttpURLConnection {
         return JavaNetHeaders.toMultimap(requestHeaders.build(), null);
     }
 
-    @Override public final InputStream getInputStream() throws IOException {
+    @Override
+    public final InputStream getInputStream() throws IOException {
         if (!doInput) {
             throw new ProtocolException("This protocol does not support input");
         }
@@ -224,7 +242,8 @@ public class HttpURLConnectionImpl extends HttpURLConnection {
         return response.getResponse().body().byteStream();
     }
 
-    @Override public final OutputStream getOutputStream() throws IOException {
+    @Override
+    public final OutputStream getOutputStream() throws IOException {
         connect();
 
         BufferedSink sink = httpEngine.getBufferedRequestBody();
@@ -237,26 +256,29 @@ public class HttpURLConnectionImpl extends HttpURLConnection {
         return sink.outputStream();
     }
 
-    @Override public final Permission getPermission() throws IOException {
+    @Override
+    public final Permission getPermission() throws IOException {
         URL url = getURL();
-        String hostName = url.getHost();
+        String hostname = url.getHost();
         int hostPort = url.getPort() != -1
                 ? url.getPort()
                 : HttpUrl.defaultPort(url.getProtocol());
         if (usingProxy()) {
             InetSocketAddress proxyAddress = (InetSocketAddress) client.proxy().address();
-            hostName = proxyAddress.getHostName();
+            hostname = proxyAddress.getHostName();
             hostPort = proxyAddress.getPort();
         }
-        return new SocketPermission(hostName + ":" + hostPort, "connect, resolve");
+        return new SocketPermission(hostname + ":" + hostPort, "connect, resolve");
     }
 
-    @Override public final String getRequestProperty(String field) {
+    @Override
+    public final String getRequestProperty(String field) {
         if (field == null) return null;
         return requestHeaders.get(field);
     }
 
-    @Override public void setConnectTimeout(int timeoutMillis) {
+    @Override
+    public void setConnectTimeout(int timeoutMillis) {
         client = client.newBuilder()
                 .connectTimeout(timeoutMillis, TimeUnit.MILLISECONDS)
                 .build();
@@ -269,21 +291,25 @@ public class HttpURLConnectionImpl extends HttpURLConnection {
                 .build();
     }
 
-    @Override public boolean getInstanceFollowRedirects() {
+    @Override
+    public boolean getInstanceFollowRedirects() {
         return client.followRedirects();
     }
 
-    @Override public int getConnectTimeout() {
+    @Override
+    public int getConnectTimeout() {
         return client.connectTimeoutMillis();
     }
 
-    @Override public void setReadTimeout(int timeoutMillis) {
+    @Override
+    public void setReadTimeout(int timeoutMillis) {
         client = client.newBuilder()
                 .readTimeout(timeoutMillis, TimeUnit.MILLISECONDS)
                 .build();
     }
 
-    @Override public int getReadTimeout() {
+    @Override
+    public int getReadTimeout() {
         return client.readTimeoutMillis();
     }
 
@@ -431,7 +457,11 @@ public class HttpURLConnectionImpl extends HttpURLConnection {
      */
     private boolean execute(boolean readResponse) throws IOException {
         boolean releaseConnection = true;
+        if (urlFilter != null) {
+            urlFilter.checkURLPermitted(httpEngine.getRequest().url().url());
+        }
         try {
+            DeviceBandwidthSampler.getInstance().startSampling();
             httpEngine.sendRequest();
             Connection connection = httpEngine.getConnection();
             if (connection != null) {
@@ -483,6 +513,8 @@ public class HttpURLConnectionImpl extends HttpURLConnection {
                 StreamAllocation streamAllocation = httpEngine.close();
                 streamAllocation.release();
             }
+            DeviceBandwidthSampler.getInstance().stopSampling();
+
         }
     }
 
@@ -492,28 +524,32 @@ public class HttpURLConnectionImpl extends HttpURLConnection {
      * <ul>
      *   <li>A specific proxy was explicitly configured for this connection.
      *   <li>The response has already been retrieved, and a proxy was {@link
-     *       java.net.ProxySelector selected} in order to get it.
+     *       ProxySelector selected} in order to get it.
      * </ul>
      *
      * <p><strong>Warning:</strong> This method may return false before attempting to connect and true
      * afterwards.
      */
-    @Override public final boolean usingProxy() {
+    @Override
+    public final boolean usingProxy() {
         Proxy proxy = route != null
                 ? route.proxy()
                 : client.proxy();
         return proxy != null && proxy.type() != Proxy.Type.DIRECT;
     }
 
-    @Override public String getResponseMessage() throws IOException {
+    @Override
+    public String getResponseMessage() throws IOException {
         return getResponse().getResponse().message();
     }
 
-    @Override public final int getResponseCode() throws IOException {
+    @Override
+    public final int getResponseCode() throws IOException {
         return getResponse().getResponse().code();
     }
 
-    @Override public final void setRequestProperty(String field, String newValue) {
+    @Override
+    public final void setRequestProperty(String field, String newValue) {
         if (connected) {
             throw new IllegalStateException("Cannot set request property after connection is made");
         }
@@ -538,7 +574,8 @@ public class HttpURLConnectionImpl extends HttpURLConnection {
         }
     }
 
-    @Override public void setIfModifiedSince(long newValue) {
+    @Override
+    public void setIfModifiedSince(long newValue) {
         super.setIfModifiedSince(newValue);
         if (ifModifiedSince != 0) {
             requestHeaders.set("If-Modified-Since", HttpDate.format(new Date(ifModifiedSince)));
@@ -547,7 +584,8 @@ public class HttpURLConnectionImpl extends HttpURLConnection {
         }
     }
 
-    @Override public final void addRequestProperty(String field, String value) {
+    @Override
+    public final void addRequestProperty(String field, String value) {
         if (connected) {
             throw new IllegalStateException("Cannot add request property after connection is made");
         }
@@ -595,18 +633,21 @@ public class HttpURLConnectionImpl extends HttpURLConnection {
                 .build();
     }
 
-    @Override public void setRequestMethod(String method) throws ProtocolException {
+    @Override
+    public void setRequestMethod(String method) throws ProtocolException {
         if (!METHODS.contains(method)) {
             throw new ProtocolException("Expected one of " + METHODS + " but was " + method);
         }
         this.method = method;
     }
 
-    @Override public void setFixedLengthStreamingMode(int contentLength) {
+    @Override
+    public void setFixedLengthStreamingMode(int contentLength) {
         setFixedLengthStreamingMode((long) contentLength);
     }
 
-    @Override public void setFixedLengthStreamingMode(long contentLength) {
+    @Override
+    public void setFixedLengthStreamingMode(long contentLength) {
         if (super.connected) throw new IllegalStateException("Already connected");
         if (chunkLength > 0) throw new IllegalStateException("Already in chunked mode");
         if (contentLength < 0) throw new IllegalArgumentException("contentLength < 0");

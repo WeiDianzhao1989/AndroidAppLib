@@ -1,10 +1,6 @@
 package com.koudai.net.kernal.internal.http;
 
-import com.koudai.net.io.ByteString;
-import com.koudai.net.io.ForwardingSource;
-import com.koudai.net.io.Okio;
-import com.koudai.net.io.Sink;
-import com.koudai.net.io.Source;
+import com.koudai.net.io.*;
 import com.koudai.net.kernal.Headers;
 import com.koudai.net.kernal.Protocol;
 import com.koudai.net.kernal.Request;
@@ -147,7 +143,7 @@ public final class Http2xStream implements HttpStream {
         result.add(new Header(TARGET_METHOD, request.method()));
         result.add(new Header(TARGET_PATH, RequestLine.requestPath(request.url())));
         result.add(new Header(VERSION, "HTTP/1.1"));
-        result.add(new Header(TARGET_HOST, Util.hostHeader(request.url())));
+        result.add(new Header(TARGET_HOST, Util.hostHeader(request.url(), false)));
         result.add(new Header(TARGET_SCHEME, request.url().scheme()));
 
         Set<ByteString> names = new LinkedHashSet<ByteString>();
@@ -186,7 +182,7 @@ public final class Http2xStream implements HttpStream {
         List<Header> result = new ArrayList<Header>(headers.size() + 4);
         result.add(new Header(TARGET_METHOD, request.method()));
         result.add(new Header(TARGET_PATH, RequestLine.requestPath(request.url())));
-        result.add(new Header(TARGET_AUTHORITY, Util.hostHeader(request.url()))); // Optional.
+        result.add(new Header(TARGET_AUTHORITY, Util.hostHeader(request.url(), false))); // Optional.
         result.add(new Header(TARGET_SCHEME, request.url().scheme()));
 
         for (int i = 0, size = headers.size(); i < size; i++) {

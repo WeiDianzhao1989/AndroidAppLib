@@ -101,7 +101,8 @@ public abstract class ResponseBody implements Closeable {
     return contentType != null ? contentType.charset(UTF_8) : UTF_8;
   }
 
-  @Override public void close() {
+  @Override
+  public void close() {
     Util.closeQuietly(source());
   }
 
@@ -133,15 +134,18 @@ public abstract class ResponseBody implements Closeable {
           final MediaType contentType, final long contentLength, final BufferedSource content) {
     if (content == null) throw new NullPointerException("source == null");
     return new ResponseBody() {
-      @Override public MediaType contentType() {
+      @Override
+      public MediaType contentType() {
         return contentType;
       }
 
-      @Override public long contentLength() {
+      @Override
+      public long contentLength() {
         return contentLength;
       }
 
-      @Override public BufferedSource source() {
+      @Override
+      public BufferedSource source() {
         return content;
       }
     };

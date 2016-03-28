@@ -10,7 +10,7 @@ import com.koudai.net.NetworkLibraryConstants;
  */
 public final class NetworkFetcherConfiguration {
 
-    private static final int DEFAULT_MAX_RETRY_TIMES_AFTER_FAILED = 2;
+    private static final int DEFAULT_MAX_RETRY_TIMES_AFTER_FAILED = 1;
 
     private Context context;
 
@@ -18,6 +18,7 @@ public final class NetworkFetcherConfiguration {
     private int readTimeOut;
     private int writeTimeOut;
     private int maxRetryTimesAfterFailed;
+    private boolean isLogger;
 
     private IRequestParamsInterceptor requestParamsInterceptor;
     private IRequestHeaderInterceptor requestHeaderInterceptor;
@@ -33,6 +34,7 @@ public final class NetworkFetcherConfiguration {
         this.readTimeOut = builder.readTimeOut;
         this.writeTimeOut = builder.writeTimeOut;
         this.maxRetryTimesAfterFailed = builder.maxRetryTimesAfterFailed;
+        this.isLogger = builder.isLogger;
         this.requestParamsInterceptor = builder.requestParamsInterceptor;
         this.requestHeaderInterceptor = builder.requestHeaderInterceptor;
         this.responseProcessor = builder.responseProcessor;
@@ -84,6 +86,10 @@ public final class NetworkFetcherConfiguration {
         return maxRetryTimesAfterFailed;
     }
 
+    public boolean isLogger() {
+        return isLogger;
+    }
+
     public IRequestParamsInterceptor getRequestParamsInterceptor() {
         return requestParamsInterceptor;
     }
@@ -96,12 +102,14 @@ public final class NetworkFetcherConfiguration {
         return responseProcessor;
     }
 
+
     public static final class Builder {
         private Context context;
         private int connectTimeOut;
         private int readTimeOut;
         private int writeTimeOut;
         private int maxRetryTimesAfterFailed = DEFAULT_MAX_RETRY_TIMES_AFTER_FAILED;
+        private boolean isLogger;
 
         private IRequestParamsInterceptor requestParamsInterceptor;
         private IRequestHeaderInterceptor requestHeaderInterceptor;
@@ -127,6 +135,10 @@ public final class NetworkFetcherConfiguration {
             return this;
         }
 
+        public Builder isLogger(boolean isLogger) {
+            this.isLogger = isLogger;
+            return this;
+        }
 
         public Builder maxRetryTimesAfterFailed(int maxRetryTimesAfterFailed) {
             this.maxRetryTimesAfterFailed = maxRetryTimesAfterFailed;
@@ -147,7 +159,6 @@ public final class NetworkFetcherConfiguration {
             this.responseProcessor = responseProcessor;
             return this;
         }
-
 
         public NetworkFetcherConfiguration build() {
             return new NetworkFetcherConfiguration(this);

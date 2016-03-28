@@ -87,17 +87,20 @@ public final class MultipartBody extends RequestBody {
     }
 
     /** A combination of {@link #type()} and {@link #boundary()}. */
-    @Override public MediaType contentType() {
+    @Override
+    public MediaType contentType() {
         return contentType;
     }
 
-    @Override public long contentLength() throws IOException {
+    @Override
+    public long contentLength() throws IOException {
         long result = contentLength;
         if (result != -1L) return result;
         return contentLength = writeOrCountBytes(null, true);
     }
 
-    @Override public void writeTo(BufferedSink sink) throws IOException {
+    @Override
+    public void writeTo(BufferedSink sink) throws IOException {
         writeOrCountBytes(sink, false);
     }
 
@@ -303,13 +306,13 @@ public final class MultipartBody extends RequestBody {
         /** Add a form data part to the body. */
         public Builder addFormDataPart(String name, String value
                 , MediaType mediaType, String contentTransferEncoding) {
-            return addPart(Part.createFormData(name, value,mediaType,contentTransferEncoding));
+            return addPart(Part.createFormData(name, value, mediaType, contentTransferEncoding));
         }
 
         /** Add a form data part to the body. */
         public Builder addFormDataPart(String name, String filename,
                                        String contentTransferEncoding,RequestBody body) {
-            return addPart(Part.createFormData(name, filename,contentTransferEncoding, body));
+            return addPart(Part.createFormData(name, filename, contentTransferEncoding, body));
         }
 
         /** Add a part to the body. */

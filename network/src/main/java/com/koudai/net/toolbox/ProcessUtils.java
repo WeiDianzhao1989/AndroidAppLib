@@ -1,4 +1,4 @@
-package com.koudai.net.netutils;
+package com.koudai.net.toolbox;
 
 import android.app.ActivityManager;
 import android.content.Context;
@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * Created by zhaoyu on 15/12/30.
  */
-public class ProcessUtils {
+public final class ProcessUtils {
     /**
      * 是否主进程
      *

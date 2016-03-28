@@ -10,6 +10,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static com.koudai.net.kernal.internal.Util.delimiterOffset;
+import static com.koudai.net.kernal.internal.Util.trimSubstring;
 import static java.util.logging.Level.WARNING;
 
 /** A cookie jar that delegates to a {@link CookieHandler}. */
@@ -20,7 +22,8 @@ public final class JavaNetCookieJar implements CookieJar {
         this.cookieHandler = cookieHandler;
     }
 
-    @Override public void saveFromResponse(HttpUrl url, List<Cookie> cookies) {
+    @Override
+    public void saveFromResponse(HttpUrl url, List<Cookie> cookies) {
         if (cookieHandler != null) {
             List<String> cookieStrings = new ArrayList<String>();
             for (Cookie cookie : cookies) {
@@ -35,7 +38,8 @@ public final class JavaNetCookieJar implements CookieJar {
         }
     }
 
-    @Override public List<Cookie> loadForRequest(HttpUrl url) {
+    @Override
+    public List<Cookie> loadForRequest(HttpUrl url) {
         // The RI passes all headers. We don't have 'em, so we don't pass 'em!
         Map<String, List<String>> headers = Collections.emptyMap();
         Map<String, List<String>> cookieHeaders;
@@ -68,23 +72,29 @@ public final class JavaNetCookieJar implements CookieJar {
      * multiple cookies in a single request header, which {@link Cookie#parse} doesn't support.
      */
     private List<Cookie> decodeHeaderAsJavaNetCookies(HttpUrl url, String header) {
-        List<HttpCookie> javaNetCookies;
-        try {
-            javaNetCookies = HttpCookie.parse(header);
-        } catch (IllegalArgumentException e) {
-            // Unfortunately sometimes java.net gives a Cookie like "$Version=1" which it can't parse!
-            Internal.logger.log(WARNING, "Parsing request cookie failed for " + url.resolve("/..."), e);
-            return Collections.emptyList();
-        }
         List<Cookie> result = new ArrayList<Cookie>();
-        for (HttpCookie javaNetCookie : javaNetCookies) {
+        for (int pos = 0, limit = header.length(), pairEnd; pos < limit; pos = pairEnd + 1) {
+            pairEnd = delimiterOffset(header, pos, limit, ";,");
+            int equalsSign = delimiterOffset(header, pos, pairEnd, '=');
+            String name = trimSubstring(header, pos, equalsSign);
+            if (name.startsWith("$")) continue;
+
+            // We have either name=value or just a name.
+            String value = equalsSign < pairEnd
+                    ? trimSubstring(header, equalsSign + 1, pairEnd)
+                    : "";
+
+            // If the value is "quoted", drop the quotes.
+            if (value.startsWith("\"") && value.endsWith("\"")) {
+                value = value.substring(1, value.length() - 1);
+            }
+
             result.add(new Cookie.Builder()
-                    .name(javaNetCookie.getName())
-                    .value(javaNetCookie.getValue())
+                    .name(name)
+                    .value(value)
                     .domain(url.host())
                     .build());
         }
         return result;
     }
 }
-

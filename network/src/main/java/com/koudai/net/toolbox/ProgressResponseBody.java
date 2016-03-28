@@ -1,11 +1,7 @@
 package com.koudai.net.toolbox;
 
+import com.koudai.net.io.*;
 import com.koudai.net.callback.ProgressCallback;
-import com.koudai.net.io.Buffer;
-import com.koudai.net.io.BufferedSource;
-import com.koudai.net.io.ForwardingSource;
-import com.koudai.net.io.Okio;
-import com.koudai.net.io.Source;
 import com.koudai.net.kernal.MediaType;
 import com.koudai.net.kernal.ResponseBody;
 
@@ -14,7 +10,7 @@ import java.io.IOException;
 /**
  * Created by zhaoyu on 15/12/2.
  */
-public class ProgressResponseBody extends ResponseBody {
+public final class ProgressResponseBody extends ResponseBody {
     //实际的待包装响应体
     private final ResponseBody responseBody;
     //进度回调接口

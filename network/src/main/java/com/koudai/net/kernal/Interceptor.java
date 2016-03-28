@@ -5,15 +5,18 @@ import java.io.IOException;
 
 /**
  * Observes, modifies, and potentially short-circuits requests going out and the corresponding
- * requests coming back in. Typically interceptors will be used to add, remove, or transform headers
- * on the request or response.
+ * responses coming back in. Typically interceptors add, remove, or transform headers on the request
+ * or response.
  */
 public interface Interceptor {
-  Response intercept(Chain chain) throws IOException;
+    Response intercept(Chain chain) throws IOException;
 
-  interface Chain {
-    Request request();
-    Response proceed(Request request) throws IOException;
-    Connection connection();
-  }
+    interface Chain {
+        Request request();
+
+        Response proceed(Request request) throws IOException;
+
+        Connection connection();
+    }
 }
+

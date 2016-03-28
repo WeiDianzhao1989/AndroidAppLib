@@ -23,20 +23,23 @@ public final class Challenge {
     return realm;
   }
 
-  @Override public boolean equals(Object o) {
+  @Override
+  public boolean equals(Object o) {
     return o instanceof Challenge
         && equal(scheme, ((Challenge) o).scheme)
         && equal(realm, ((Challenge) o).realm);
   }
 
-  @Override public int hashCode() {
+  @Override
+  public int hashCode() {
     int result = 29;
     result = 31 * result + (realm != null ? realm.hashCode() : 0);
     result = 31 * result + (scheme != null ? scheme.hashCode() : 0);
     return result;
   }
 
-  @Override public String toString() {
+  @Override
+  public String toString() {
     return scheme + " realm=\"" + realm + "\"";
   }
 }

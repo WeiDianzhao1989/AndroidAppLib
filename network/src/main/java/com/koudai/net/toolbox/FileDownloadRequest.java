@@ -9,7 +9,6 @@ import com.koudai.net.kernal.Callback;
 import com.koudai.net.kernal.HttpUrl;
 import com.koudai.net.kernal.RequestBody;
 import com.koudai.net.kernal.internal.Util;
-import com.koudai.net.netutils.CollectionUtils;
 import com.koudai.net.toolbox.processor.FileDownloadProcessor;
 
 import java.io.File;
@@ -51,7 +50,7 @@ public final class FileDownloadRequest extends HttpRequest<File> {
                     builder.retryTimesAfterFailed;
         }
 
-        this.timestamp = System.currentTimeMillis();
+        this.requestStartTime = System.currentTimeMillis();
     }
 
     @Override
@@ -87,7 +86,7 @@ public final class FileDownloadRequest extends HttpRequest<File> {
 
             return httpUrlBuilder.build();
         } catch (UnsupportedEncodingException e) {
-
+            NetworkLog.getInstance().e(e.getMessage());
         }
 
 

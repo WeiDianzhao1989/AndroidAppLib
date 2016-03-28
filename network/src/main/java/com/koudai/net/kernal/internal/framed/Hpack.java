@@ -1,10 +1,6 @@
 package com.koudai.net.kernal.internal.framed;
 
-import com.koudai.net.io.Buffer;
-import com.koudai.net.io.BufferedSource;
-import com.koudai.net.io.ByteString;
-import com.koudai.net.io.Okio;
-import com.koudai.net.io.Source;
+import com.koudai.net.io.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -164,7 +160,7 @@ final class Hpack {
           entriesToEvict++;
         }
         System.arraycopy(dynamicTable, nextHeaderIndex + 1, dynamicTable,
-            nextHeaderIndex + 1 + entriesToEvict, headerCount);
+                nextHeaderIndex + 1 + entriesToEvict, headerCount);
         nextHeaderIndex += entriesToEvict;
       }
       return entriesToEvict;

@@ -9,6 +9,6 @@ import java.io.IOException;
  */
 public interface IResponseProcessor {
 
-    String process(Response response) throws RuntimeException
+    String process(HttpRequest<?> request, Response response) throws RuntimeException
             , IOException;
 }

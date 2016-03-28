@@ -343,7 +343,8 @@ public final class StreamAllocation {
     return true;
   }
 
-  @Override public String toString() {
+  @Override
+  public String toString() {
     return address.toString();
   }
 }

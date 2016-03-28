@@ -1,13 +1,15 @@
 package com.koudai.net.toolbox;
 
+import android.text.TextUtils;
+
 import com.koudai.net.callback.Callback;
 import com.koudai.net.callback.RetryCallback;
 import com.koudai.net.error.NetworkError;
 import com.koudai.net.kernal.HttpUrl;
 import com.koudai.net.kernal.RequestBody;
-import com.koudai.net.netutils.CollectionUtils;
 
 import java.nio.charset.Charset;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -45,13 +47,28 @@ public abstract class HttpRequest<T> implements Comparable<HttpRequest<?>> {
 
     private RequestQueue requestQueue;
 
-    protected long timestamp;
+    protected long requestStartTime;
 
     protected IRequestHeaderInterceptor requestHeaderInterceptor;
     protected IRequestParamsInterceptor requestParamsInterceptor;
 
-    String url() {
+    private Map<String, String> monitorParams = new HashMap<String, String>();
+
+
+    public Map<String, String> monitorParams() {
+        return monitorParams;
+    }
+
+    public void monitor(String key, String value) {
+        monitorParams.put(key, value);
+    }
+
+    public String url() {
         return url;
+    }
+
+    long requestStartTime() {
+        return requestStartTime;
     }
 
     int maxRetryTimesAfterFailed() {
@@ -134,11 +151,11 @@ public abstract class HttpRequest<T> implements Comparable<HttpRequest<?>> {
     }
 
     void finish() {
-        markFinish();
-        //if(requestQueue != null) {
+        if (!isFinished()) {
+            markFinish();
             requestQueue.finish(this);
             requestQueue = null;
-        //}
+        }
     }
 
     protected abstract String tag();
@@ -181,11 +198,15 @@ public abstract class HttpRequest<T> implements Comparable<HttpRequest<?>> {
      * @return
      */
     protected Map<String, String> assembleHeaders() {
-        IRequestHeaderInterceptor headersInterceptor =
-                requestParamsInterceptor != null ?
-                        requestHeaderInterceptor :
-                        NetworkFetcherGlobalParams.getInstance().getRequestHeaderInterceptor();
-        return headersInterceptor.interceptHeader(this.headers);
+        if (headers != null) {
+            IRequestHeaderInterceptor headersInterceptor =
+                    requestHeaderInterceptor != null ?
+                            requestHeaderInterceptor :
+                            NetworkFetcherGlobalParams.getInstance().getRequestHeaderInterceptor();
+            return headersInterceptor.interceptHeader(this.headers);
+        } else {
+            return CollectionUtils.EMPTY_STRING_MAP;
+        }
     }
 
     /**
@@ -215,7 +236,7 @@ public abstract class HttpRequest<T> implements Comparable<HttpRequest<?>> {
 
         if (left == right) {
             if (requestLevel == other.requestLevel) {
-                return this.timestamp > other.timestamp ? -1 : 1;
+                return this.requestStartTime > other.requestStartTime ? -1 : 1;
             } else {
                 return this.requestLevel > other.requestLevel ?
                         -1 : 1;
@@ -223,6 +244,22 @@ public abstract class HttpRequest<T> implements Comparable<HttpRequest<?>> {
         } else {
             return left > right ? -1 : 1;
         }
+    }
 
+    @Override
+    public int hashCode() {
+        String tag = tag();
+        return TextUtils.isEmpty(tag) ? super.hashCode() : tag.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof HttpRequest)) {
+            return false;
+        }
+
+        HttpRequest other = (HttpRequest) obj;
+
+        return TextUtils.equals(tag(), other.tag());
     }
 }

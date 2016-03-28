@@ -11,7 +11,6 @@ import com.koudai.net.kernal.MediaType;
 import com.koudai.net.kernal.MultipartBody;
 import com.koudai.net.kernal.RequestBody;
 import com.koudai.net.kernal.internal.Util;
-import com.koudai.net.netutils.CollectionUtils;
 
 import java.io.File;
 import java.util.List;
@@ -54,7 +53,7 @@ public final class FileUploadRequest<T> extends HttpRequest<T> {
                     builder.retryTimesAfterFailed;
         }
 
-        this.timestamp = System.currentTimeMillis();
+        this.requestStartTime = System.currentTimeMillis();
     }
 
     /**

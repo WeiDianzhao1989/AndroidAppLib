@@ -14,10 +14,11 @@ public abstract class NamedRunnable implements Runnable {
     this.name = String.format(format, args);
   }
 
-  @Override public final void run() {
+  @Override
+  public final void run() {
     String oldName = Thread.currentThread().getName();
     Thread.currentThread().setName(name);
-    android.os.Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+    Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
     try {
       execute();
     } finally {

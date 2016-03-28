@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 
 import com.koudai.net.kernal.OkHttpClient;
 import com.koudai.net.kernal.SystemPropertiesConnectionPool;
-
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -20,7 +19,7 @@ import javax.net.ssl.X509TrustManager;
 /**
  * Created by zhaoyu on 16/1/4.
  */
-public class OkHttpClientFactory {
+public final class OkHttpClientFactory {
 
     public static OkHttpClient createOkHttpClient() {
 

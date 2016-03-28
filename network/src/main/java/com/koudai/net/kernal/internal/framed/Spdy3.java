@@ -1,12 +1,7 @@
 
 package com.koudai.net.kernal.internal.framed;
 
-import com.koudai.net.io.Buffer;
-import com.koudai.net.io.BufferedSink;
-import com.koudai.net.io.BufferedSource;
-import com.koudai.net.io.ByteString;
-import com.koudai.net.io.DeflaterSink;
-import com.koudai.net.io.Okio;
+import com.koudai.net.io.*;
 import com.koudai.net.kernal.Protocol;
 import com.koudai.net.kernal.internal.Util;
 
@@ -22,7 +17,8 @@ import java.util.zip.Deflater;
  */
 public final class Spdy3 implements Variant {
 
-  @Override public Protocol getProtocol() {
+  @Override
+  public Protocol getProtocol() {
     return Protocol.SPDY_3;
   }
 
@@ -82,11 +78,13 @@ public final class Spdy3 implements Variant {
     }
   }
 
-  @Override public FrameReader newReader(BufferedSource source, boolean client) {
+  @Override
+  public FrameReader newReader(BufferedSource source, boolean client) {
     return new Reader(source, client);
   }
 
-  @Override public FrameWriter newWriter(BufferedSink sink, boolean client) {
+  @Override
+  public FrameWriter newWriter(BufferedSink sink, boolean client) {
     return new Writer(sink, client);
   }
 
@@ -102,14 +100,16 @@ public final class Spdy3 implements Variant {
       this.client = client;
     }
 
-    @Override public void readConnectionPreface() {
+    @Override
+    public void readConnectionPreface() {
     }
 
     /**
      * Send the next frame to {@code handler}. Returns true unless there are no
      * more frames on the stream.
      */
-    @Override public boolean nextFrame(Handler handler) throws IOException {
+    @Override
+    public boolean nextFrame(Handler handler) throws IOException {
       int w1;
       int w2;
       try {
@@ -265,7 +265,8 @@ public final class Spdy3 implements Variant {
       throw new IOException(String.format(message, args));
     }
 
-    @Override public void close() throws IOException {
+    @Override
+    public void close() throws IOException {
       headerBlockReader.close();
     }
   }
@@ -288,7 +289,8 @@ public final class Spdy3 implements Variant {
       headerBlockOut = Okio.buffer(new DeflaterSink(headerBlockBuffer, deflater));
     }
 
-    @Override public void ackSettings(Settings peerSettings) {
+    @Override
+    public void ackSettings(Settings peerSettings) {
       // Do nothing: no ACK for SPDY/3 settings.
     }
 
@@ -298,16 +300,19 @@ public final class Spdy3 implements Variant {
       // Do nothing: no push promise for SPDY/3.
     }
 
-    @Override public synchronized void connectionPreface() {
+    @Override
+    public synchronized void connectionPreface() {
       // Do nothing: no connection preface for SPDY/3.
     }
 
-    @Override public synchronized void flush() throws IOException {
+    @Override
+    public synchronized void flush() throws IOException {
       if (closed) throw new IOException("closed");
       sink.flush();
     }
 
-    @Override public synchronized void synStream(boolean outFinished, boolean inFinished,
+    @Override
+    public synchronized void synStream(boolean outFinished, boolean inFinished,
         int streamId, int associatedStreamId, List<Header> headerBlock)
         throws IOException {
       if (closed) throw new IOException("closed");
@@ -326,7 +331,8 @@ public final class Spdy3 implements Variant {
       sink.flush();
     }
 
-    @Override public synchronized void synReply(boolean outFinished, int streamId,
+    @Override
+    public synchronized void synReply(boolean outFinished, int streamId,
         List<Header> headerBlock) throws IOException {
       if (closed) throw new IOException("closed");
       writeNameValueBlockToBuffer(headerBlock);
@@ -341,7 +347,8 @@ public final class Spdy3 implements Variant {
       sink.flush();
     }
 
-    @Override public synchronized void headers(int streamId, List<Header> headerBlock)
+    @Override
+    public synchronized void headers(int streamId, List<Header> headerBlock)
         throws IOException {
       if (closed) throw new IOException("closed");
       writeNameValueBlockToBuffer(headerBlock);
@@ -355,7 +362,8 @@ public final class Spdy3 implements Variant {
       sink.writeAll(headerBlockBuffer);
     }
 
-    @Override public synchronized void rstStream(int streamId, ErrorCode errorCode)
+    @Override
+    public synchronized void rstStream(int streamId, ErrorCode errorCode)
         throws IOException {
       if (closed) throw new IOException("closed");
       if (errorCode.spdyRstCode == -1) throw new IllegalArgumentException();
@@ -369,11 +377,13 @@ public final class Spdy3 implements Variant {
       sink.flush();
     }
 
-    @Override public int maxDataLength() {
+    @Override
+    public int maxDataLength() {
       return 16383;
     }
 
-    @Override public synchronized void data(boolean outFinished, int streamId, Buffer source,
+    @Override
+    public synchronized void data(boolean outFinished, int streamId, Buffer source,
         int byteCount) throws IOException {
       int flags = (outFinished ? FLAG_FIN : 0);
       sendDataFrame(streamId, flags, source, byteCount);
@@ -405,7 +415,8 @@ public final class Spdy3 implements Variant {
       headerBlockOut.flush();
     }
 
-    @Override public synchronized void settings(Settings settings) throws IOException {
+    @Override
+    public synchronized void settings(Settings settings) throws IOException {
       if (closed) throw new IOException("closed");
       int type = TYPE_SETTINGS;
       int flags = 0;
@@ -423,7 +434,8 @@ public final class Spdy3 implements Variant {
       sink.flush();
     }
 
-    @Override public synchronized void ping(boolean reply, int payload1, int payload2)
+    @Override
+    public synchronized void ping(boolean reply, int payload1, int payload2)
         throws IOException {
       if (closed) throw new IOException("closed");
       boolean payloadIsReply = client != ((payload1 & 1) == 1);
@@ -437,7 +449,8 @@ public final class Spdy3 implements Variant {
       sink.flush();
     }
 
-    @Override public synchronized void goAway(int lastGoodStreamId, ErrorCode errorCode,
+    @Override
+    public synchronized void goAway(int lastGoodStreamId, ErrorCode errorCode,
         byte[] ignored) throws IOException {
       if (closed) throw new IOException("closed");
       if (errorCode.spdyGoAwayCode == -1) {
@@ -453,7 +466,8 @@ public final class Spdy3 implements Variant {
       sink.flush();
     }
 
-    @Override public synchronized void windowUpdate(int streamId, long increment)
+    @Override
+    public synchronized void windowUpdate(int streamId, long increment)
         throws IOException {
       if (closed) throw new IOException("closed");
       if (increment == 0 || increment > 0x7fffffffL) {
@@ -470,7 +484,8 @@ public final class Spdy3 implements Variant {
       sink.flush();
     }
 
-    @Override public synchronized void close() throws IOException {
+    @Override
+    public synchronized void close() throws IOException {
       closed = true;
       Util.closeAll(sink, headerBlockOut);
     }

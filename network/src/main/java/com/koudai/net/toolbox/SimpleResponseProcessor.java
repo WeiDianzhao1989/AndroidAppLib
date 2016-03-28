@@ -8,9 +8,9 @@ import java.io.IOException;
 /**
  * Created by zhaoyu on 16/1/6.
  */
-public class SimpleResponseProcessor implements IResponseProcessor {
+public final class SimpleResponseProcessor implements IResponseProcessor {
     @Override
-    public String process(Response response) throws RuntimeException, IOException {
+    public String process(HttpRequest<?> request, Response response) throws RuntimeException, IOException {
         ResponseBody responseBody = response.body();
         String responseString = "";
         if (responseBody != null) {

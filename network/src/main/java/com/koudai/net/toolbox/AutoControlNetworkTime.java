@@ -37,26 +37,41 @@ final class AutoControlNetworkTime implements ConnectionClassManager.ConnectionC
                 NetworkFetcherGlobalParams.getInstance().setReadTimeout(NetworkLibraryConstants.POOR_READ_TIMEOUT);
                 NetworkFetcherGlobalParams.getInstance().setWriteTimeout(NetworkLibraryConstants.POOR_WRITE_TIMEOUT);
                 NetworkFetcherGlobalParams.getInstance().setConnectionTimeout(NetworkLibraryConstants.POOR_CONNECT_TIMEOUT);
+                RequestQueue.getInstance().setMaxRequests(NetworkLibraryConstants.POOR_MAX_REQUEST);
+                RequestQueue.getInstance().setMaxRequestsPerHost(NetworkLibraryConstants.POOR_MAX_REQUEST_PER_HOST);
+
                 break;
             case MODERATE:
                 NetworkFetcherGlobalParams.getInstance().setReadTimeout(NetworkLibraryConstants.MODERATE_READ_TIMEOUT);
                 NetworkFetcherGlobalParams.getInstance().setWriteTimeout(NetworkLibraryConstants.MODERATE_WRITE_TIMEOUT);
                 NetworkFetcherGlobalParams.getInstance().setConnectionTimeout(NetworkLibraryConstants.MODERATE_CONNECT_TIMEOUT);
+                RequestQueue.getInstance().setMaxRequests(NetworkLibraryConstants.MODERATE_MAX_REQUEST);
+                RequestQueue.getInstance().setMaxRequestsPerHost(NetworkLibraryConstants.MODERATE_MAX_REQUEST_PER_HOST);
+
                 break;
             case GOOD:
                 NetworkFetcherGlobalParams.getInstance().setReadTimeout(NetworkLibraryConstants.GOOD_READ_TIMEOUT);
                 NetworkFetcherGlobalParams.getInstance().setWriteTimeout(NetworkLibraryConstants.GOOD_WRITE_TIMEOUT);
                 NetworkFetcherGlobalParams.getInstance().setConnectionTimeout(NetworkLibraryConstants.GOOD_CONNECT_TIMEOUT);
+                RequestQueue.getInstance().setMaxRequests(NetworkLibraryConstants.GOOD_MAX_REQUEST);
+                RequestQueue.getInstance().setMaxRequestsPerHost(NetworkLibraryConstants.GOOD_MAX_REQUEST_PER_HOST);
+
                 break;
             case EXCELLENT:
                 NetworkFetcherGlobalParams.getInstance().setReadTimeout(NetworkLibraryConstants.EXCELLENT_READ_TIMEOUT);
                 NetworkFetcherGlobalParams.getInstance().setWriteTimeout(NetworkLibraryConstants.EXCELLENT_WRITE_TIMEOUT);
                 NetworkFetcherGlobalParams.getInstance().setConnectionTimeout(NetworkLibraryConstants.EXCELLENT_CONNECT_TIMEOUT);
+                RequestQueue.getInstance().setMaxRequests(NetworkLibraryConstants.EXCELLENT_MAX_REQUEST);
+                RequestQueue.getInstance().setMaxRequestsPerHost(NetworkLibraryConstants.EXCELLENT_MAX_REQUEST_PER_HOST);
+
                 break;
             case UNKNOWN:
                 NetworkFetcherGlobalParams.getInstance().setReadTimeout(NetworkFetcherGlobalParams.getInstance().getDefaultReadTimeout());
                 NetworkFetcherGlobalParams.getInstance().setWriteTimeout(NetworkFetcherGlobalParams.getInstance().getDefaultWriteTimeout());
                 NetworkFetcherGlobalParams.getInstance().setConnectionTimeout(NetworkFetcherGlobalParams.getInstance().getDefaultConnectionTimeout());
+                RequestQueue.getInstance().setMaxRequests(NetworkLibraryConstants.DEFAULT_MAX_REQUEST);
+                RequestQueue.getInstance().setMaxRequestsPerHost(NetworkLibraryConstants.DEFAULT_MAX_REQUEST_PER_HOST);
+
                 break;
         }
     }

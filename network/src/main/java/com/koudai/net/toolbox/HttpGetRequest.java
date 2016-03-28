@@ -9,7 +9,6 @@ import com.koudai.net.callback.RetryCallback;
 import com.koudai.net.kernal.HttpUrl;
 import com.koudai.net.kernal.RequestBody;
 import com.koudai.net.kernal.internal.Util;
-import com.koudai.net.netutils.CollectionUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -52,7 +51,7 @@ public final class HttpGetRequest<T> extends HttpRequest<T> {
                     builder.retryTimesAfterFailed;
         }
 
-        this.timestamp = System.currentTimeMillis();
+        this.requestStartTime = System.currentTimeMillis();
     }
 
     @Override

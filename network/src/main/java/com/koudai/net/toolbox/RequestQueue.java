@@ -13,10 +13,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -39,11 +38,11 @@ final class RequestQueue {
 
     private final Map<String, Queue<HttpRequest<?>>> waitingRequests =
             new HashMap<String, Queue<HttpRequest<?>>>();
-    private final Set<HttpRequest<?>> currentRequests = new HashSet<HttpRequest<?>>();
+    private final Set<HttpRequest<?>> currentRunningRequests = new HashSet<HttpRequest<?>>();
 
     //减少并发请求，以便能更快
-    private final int maxRequests = 64;//总共允许64个并发请求
-    private final int maxRequestsPerHost = 10;//每个host允许10个并发请求
+    private volatile int maxRequests = 64;//总共允许64个并发请求
+    private volatile int maxRequestsPerHost = 10;//每个host允许10个并发请求
 
     /**
      * Ready async calls in the order they'll be run.
@@ -53,12 +52,17 @@ final class RequestQueue {
     /**
      * Running asynchronous calls. Includes canceled calls that haven't finished yet.
      */
-    private final BlockingQueue<HttpRequestRunnable> runningAsyncCalls = new PriorityBlockingQueue<HttpRequestRunnable>();
+    private final Queue<HttpRequestRunnable> runningAsyncCalls = new PriorityQueue<HttpRequestRunnable>();
+
+    /**
+     * 用于同步正在运行的请求和等待运行的请求的队列访问，注意，用于合并请求控制集合不用这个锁控制
+     */
+    private RequestQueueLock queueLock = new RequestQueueLock();
 
     public void start() {
         for (int i = 0; i < dispatchers.length; i++) {
-            dispatchers[i] = new NetworkRequestDispatcher(runningAsyncCalls, currentRequests,
-                    waitingRequests);
+            dispatchers[i] = new NetworkRequestDispatcher(queueLock, runningAsyncCalls,
+                    waitingRequests, currentRunningRequests);
             dispatchers[i].start();
         }
     }
@@ -80,14 +84,23 @@ final class RequestQueue {
     }
 
     private void internalEnqueue(HttpRequestRunnable requestRunnable) {
-        synchronized (RequestQueue.this) {
+        try {
+            queueLock.lock();
             if (runningAsyncCalls.size() < maxRequests
                     && runningCallsForHost(requestRunnable) < maxRequestsPerHost) {
                 runningAsyncCalls.offer(requestRunnable);
+                NetworkLog.getInstance().d("current running request count is " + runningAsyncCalls.size());
+                queueLock.signalAll();
             } else {
                 readyAsyncCalls.add(requestRunnable);
+                NetworkLog.getInstance().d("current ready to run request count is " + readyAsyncCalls.size());
             }
+        } catch (InterruptedException e) {
+            NetworkLog.getInstance().e(e.getMessage());
+        } finally {
+            queueLock.unlock();
         }
+
     }
 
     public List<HttpRequestRunnable> enqueueAll(HttpRequest<?>... httpRequests) {
@@ -118,8 +131,8 @@ final class RequestQueue {
 
     public void finish(HttpRequest request) {
 
-        synchronized (currentRequests) {
-            currentRequests.remove(request);
+        synchronized (currentRunningRequests) {
+            currentRunningRequests.remove(request);
         }
 
         synchronized (waitingRequests) {
@@ -130,22 +143,39 @@ final class RequestQueue {
                         waitingRequests.iterator();
                 while (it.hasNext()) {
                     HttpRequest waitingRequest = it.next();
-                    if (!waitingRequest.isCanceled()) {
-                        if (waitingRequest.isSuccess()) {
+                    if (!waitingRequest.isCanceled() && !request.isCanceled()) {
+                        if (request.isSuccess()) {
+                            waitingRequest.deliveryResponse(request.response());
                             DefaultResponseDelivery.getInstance().postResponse(waitingRequest, request.response());
                         } else {
+                            waitingRequest.reportError(request.error());
                             DefaultResponseDelivery.getInstance().postError(waitingRequest, request.error());
                         }
                     } else {
                         DefaultResponseDelivery.getInstance().postCancel(waitingRequest);
                     }
-                    runningAsyncCalls.remove(waitingRequest);
                 }
             }
         }
 
         promoteCalls();
 
+    }
+
+    public void setMaxRequests(int maxRequests) {
+        if (maxRequests < 1) {
+            throw new IllegalArgumentException("max < 1: " + maxRequests);
+        }
+        this.maxRequests = maxRequests;
+        promoteCalls();
+    }
+
+    public void setMaxRequestsPerHost(int maxRequestsPerHost) {
+        if (maxRequestsPerHost < 1) {
+            throw new IllegalArgumentException("max < 1: " + maxRequestsPerHost);
+        }
+        this.maxRequestsPerHost = maxRequestsPerHost;
+        promoteCalls();
     }
 
     /**
@@ -166,24 +196,35 @@ final class RequestQueue {
     /**
      * 释放一个等待请求到运行队列里
      */
-    private synchronized void promoteCalls() {
-        if (runningAsyncCalls.size() >= maxRequests) return; // Already running max capacity.
-        if (readyAsyncCalls.isEmpty()) return; // No ready calls to promote.
+    private void promoteCalls() {
+        try {
+            queueLock.lock();
+            if (runningAsyncCalls.size() >= maxRequests) return; // Already running max capacity.
+            if (readyAsyncCalls.isEmpty()) return; // No ready calls to promote.
 
-        for (Iterator<HttpRequestRunnable> i = readyAsyncCalls.iterator(); i.hasNext(); ) {
-            HttpRequestRunnable call = i.next();
+            for (Iterator<HttpRequestRunnable> i = readyAsyncCalls.iterator(); i.hasNext(); ) {
+                HttpRequestRunnable call = i.next();
 
-            if (runningCallsForHost(call) < maxRequestsPerHost) {
-                i.remove();
-                if (!call.isCanceled()) {
-                    runningAsyncCalls.offer(call);
+                if (runningCallsForHost(call) < maxRequestsPerHost) {
+                    i.remove();
+                    if (!call.isCanceled()) {
+                        runningAsyncCalls.offer(call);
+                    }
                 }
-            }
 
-            if (runningAsyncCalls.size() >= maxRequests) return; // Reached max capacity.
+                if (runningAsyncCalls.size() >= maxRequests) return; // Reached max capacity.
+            }
+        } catch (InterruptedException e) {
+            NetworkLog.getInstance().e(e.getMessage());
+        } finally {
+            queueLock.signalAll();
+            queueLock.unlock();
         }
     }
 
+    /**
+     * 处理同时发送多个请求的例子
+     */
     private final class MultiHttpRequestCall implements Runnable {
 
         private List<HttpRequestRunnable> requestRunnables;
@@ -195,7 +236,7 @@ final class RequestQueue {
         @Override
         public void run() {
 
-            android.os.Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
             List<HttpRequestRunnable> mainTasks = new ArrayList<HttpRequestRunnable>();
             List<HttpRequestRunnable> minorTasks = new ArrayList<HttpRequestRunnable>();
 

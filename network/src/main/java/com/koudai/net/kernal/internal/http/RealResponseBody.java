@@ -15,16 +15,19 @@ public final class RealResponseBody extends ResponseBody {
     this.source = source;
   }
 
-  @Override public MediaType contentType() {
+  @Override
+  public MediaType contentType() {
     String contentType = headers.get("Content-Type");
     return contentType != null ? MediaType.parse(contentType) : null;
   }
 
-  @Override public long contentLength() {
+  @Override
+  public long contentLength() {
     return OkHeaders.contentLength(headers);
   }
 
-  @Override public BufferedSource source() {
+  @Override
+  public BufferedSource source() {
     return source;
   }
 }

@@ -58,6 +58,22 @@ public final class NetworkLibraryConstants {
     public static final int EXCELLENT_CONNECT_TIMEOUT = 8 * 1000;
 
 
+    public static final int DEFAULT_MAX_REQUEST = 32;
+    public static final int DEFAULT_MAX_REQUEST_PER_HOST = 4;
+
+    public static final int POOR_MAX_REQUEST = 8;
+    public static final int POOR_MAX_REQUEST_PER_HOST = 2;
+
+    public static final int MODERATE_MAX_REQUEST = 16;
+    public static final int MODERATE_MAX_REQUEST_PER_HOST = 3;
+
+    public static final int GOOD_MAX_REQUEST = 32;
+    public static final int GOOD_MAX_REQUEST_PER_HOST = 4;
+
+    public static final int EXCELLENT_MAX_REQUEST = 64;
+    public static final int EXCELLENT_MAX_REQUEST_PER_HOST = 5;
+
+
     public static final int INTERNAL_ERROR = 1000;//通用内部错误
     public static final int DOWNLOAD_FILE_ERROR_CODE = 1001;//文件下载失败的内部错误
     public static final int RESPONSE_PARSE_ERROR = 1002;//响应的json解析的内部错误
