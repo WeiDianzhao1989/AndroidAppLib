@@ -86,8 +86,6 @@ init network
 
         NetworkFetcher.getInstance().execute(downloadrequest);
         
-        
-        ## Amap Android客户端插件化-HelloWorld
 
 ##插件化
 
