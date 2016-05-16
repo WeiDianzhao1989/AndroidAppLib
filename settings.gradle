@@ -1,1 +1,1 @@
-include ':network', ':network', ':plugin', ':pulltorefresh'
+include ':network', ':network', ':plugin', ':pulltorefresh', ':dycontainer'
