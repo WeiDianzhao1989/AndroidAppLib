@@ -7,71 +7,87 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.view.LayoutInflater;
+
 import com.weidian.plugin.core.ctx.ContextProxy;
+import com.weidian.plugin.core.ctx.Host;
 import com.weidian.plugin.core.ctx.Module;
 import com.weidian.plugin.core.ctx.Plugin;
 
 public class PluginActivity extends Activity {
 
-	private ContextProxy contextProxy = null;
+    private ContextProxy contextProxy = null;
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		PageHelper.initTitleBar(this, contextProxy);
-		super.onCreate(savedInstanceState);
-	}
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        PageHelper.initTitleBar(this, contextProxy);
+        super.onCreate(savedInstanceState);
+    }
 
-	@Override
-	protected void attachBaseContext(Context newBase) {
-		PageHelper.setLastActivity(this);
-		this.contextProxy = new ContextProxy(newBase, this);
-		super.attachBaseContext(this.contextProxy);
-	}
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        PageHelper.setLastActivity(this);
+        this.contextProxy = new ContextProxy(newBase, this);
+        super.attachBaseContext(this.contextProxy);
+    }
 
-	@Override
-	protected void onResume() {
-		super.onResume();
-		PageHelper.setLastActivity(this);
-	}
+    @NonNull
+    @Override
+    public LayoutInflater getLayoutInflater() {
+        Plugin plugin = Plugin.getPlugin(this);
 
-	@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-	public void applyOverrideConfiguration(Configuration overrideConfiguration) {
-		this.contextProxy.applyOverrideConfiguration(overrideConfiguration);
-		super.applyOverrideConfiguration(overrideConfiguration);
-	}
+        if (plugin instanceof Host) {
+            return super.getLayoutInflater();
+        } else {
+            return plugin.getLayoutInflater();
+        }
+    }
 
-	private boolean firstSetTheme = true;
+    @Override
+    protected void onResume() {
+        super.onResume();
+        PageHelper.setLastActivity(this);
+    }
 
-	@Override
-	public void setTheme(int resid) {
-		if (firstSetTheme) {
-			firstSetTheme = false;
-			if (Plugin.getPlugin(this) instanceof Module) {
-				resid = PageHelper.getThemeResId(this, contextProxy);
-			}
-		}
-		if (resid > 0) {
-			super.setTheme(resid);
-		}
-	}
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    public void applyOverrideConfiguration(Configuration overrideConfiguration) {
+        this.contextProxy.applyOverrideConfiguration(overrideConfiguration);
+        super.applyOverrideConfiguration(overrideConfiguration);
+    }
 
-	@Override
-	public void startActivity(final Intent intent) {
-		PageHelper.startActivity(intent, new Runnable() {
-			@Override
-			public void run() {
-				PluginActivity.super.startActivity(intent);
-			}
-		});
-	}
+    private boolean firstSetTheme = true;
 
-	@Override
-	public void startActivityForResult(final Intent intent, final int requestCode) {
-		PageHelper.startActivity(intent, new Runnable() {
-			@Override
-			public void run() {
-				PluginActivity.super.startActivityForResult(intent, requestCode);
-			}
-		});
-	}
+    @Override
+    public void setTheme(int resid) {
+        if (firstSetTheme) {
+            firstSetTheme = false;
+            if (Plugin.getPlugin(this) instanceof Module) {
+                resid = PageHelper.getThemeResId(this, contextProxy);
+            }
+        }
+        if (resid > 0) {
+            super.setTheme(resid);
+        }
+    }
+
+    @Override
+    public void startActivity(final Intent intent) {
+        PageHelper.startActivity(intent, new Runnable() {
+            @Override
+            public void run() {
+                PluginActivity.super.startActivity(intent);
+            }
+        });
+    }
+
+    @Override
+    public void startActivityForResult(final Intent intent, final int requestCode) {
+        PageHelper.startActivity(intent, new Runnable() {
+            @Override
+            public void run() {
+                PluginActivity.super.startActivityForResult(intent, requestCode);
+            }
+        });
+    }
 }

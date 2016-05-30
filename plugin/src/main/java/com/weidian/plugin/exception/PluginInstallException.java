@@ -6,56 +6,56 @@ import java.util.List;
 
 public class PluginInstallException extends Exception {
 
-	private List<String> packageNameList;
-	private final List<Throwable> exList = new LinkedList<Throwable>();
+    private List<String> packageNameList;
+    private final List<Throwable> exList = new LinkedList<Throwable>();
 
-	public PluginInstallException(String message, Throwable cause) {
-		super(message);
-		this.addEx(cause);
-	}
+    public PluginInstallException(String message, Throwable cause) {
+        super(message);
+        this.addEx(cause);
+    }
 
-	public PluginInstallException(String message, Throwable cause, String packageName) {
-		super(message);
-		this.addEx(cause);
-		if (packageName != null) {
-			packageNameList = new ArrayList<String>(1);
-			packageNameList.add(packageName);
-		}
-	}
+    public PluginInstallException(String message, Throwable cause, String packageName) {
+        super(message);
+        this.addEx(cause);
+        if (packageName != null) {
+            packageNameList = new ArrayList<String>(1);
+            packageNameList.add(packageName);
+        }
+    }
 
-	@Override
-	public Throwable getCause() {
-		return exList.size() > 0 ? exList.get(0) : null;
-	}
+    @Override
+    public Throwable getCause() {
+        return exList.size() > 0 ? exList.get(0) : null;
+    }
 
-	public void addPackageName(String packageName) {
-		if (packageName != null) {
-			if (packageNameList == null) {
-				packageNameList = new ArrayList<String>(1);
-			}
-			packageNameList.add(packageName);
-		}
-	}
+    public void addPackageName(String packageName) {
+        if (packageName != null) {
+            if (packageNameList == null) {
+                packageNameList = new ArrayList<String>(1);
+            }
+            packageNameList.add(packageName);
+        }
+    }
 
-	public void addEx(Throwable ex) {
-		if (ex != null) {
-			exList.add(ex);
-		}
-	}
+    public void addEx(Throwable ex) {
+        if (ex != null) {
+            exList.add(ex);
+        }
+    }
 
-	public List<String> getPackageNameList() {
-		return packageNameList;
-	}
+    public List<String> getPackageNameList() {
+        return packageNameList;
+    }
 
-	public int packageNameListCount() {
-		return packageNameList == null ? 0 : packageNameList.size();
-	}
+    public int packageNameListCount() {
+        return packageNameList == null ? 0 : packageNameList.size();
+    }
 
-	public List<Throwable> getExList() {
-		return exList;
-	}
+    public List<Throwable> getExList() {
+        return exList;
+    }
 
-	public int exListCount() {
-		return exList.size();
-	}
+    public int exListCount() {
+        return exList.size();
+    }
 }

@@ -4,14 +4,14 @@ import com.weidian.plugin.PluginMsg;
 
 public class PluginMsgRejectException extends Exception {
 
-	private PluginMsg msg;
+    private PluginMsg msg;
 
-	public PluginMsgRejectException(PluginMsg msg) {
-		super("msg has been rejected");
-		this.msg = msg;
-	}
+    public PluginMsgRejectException(PluginMsg msg) {
+        super("msg has been rejected");
+        this.msg = msg;
+    }
 
-	public PluginMsg getMsg() {
-		return msg;
-	}
+    public PluginMsg getMsg() {
+        return msg;
+    }
 }

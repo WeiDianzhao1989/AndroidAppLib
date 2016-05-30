@@ -4,7 +4,7 @@ import com.weidian.plugin.core.ctx.Module;
 
 public interface LoadCallback {
 
-	void callback(Module module);
+    void callback(Module module);
 
-	void error(Throwable ex, boolean isCallbackError);
+    void error(Throwable ex, boolean isCallbackError);
 }
