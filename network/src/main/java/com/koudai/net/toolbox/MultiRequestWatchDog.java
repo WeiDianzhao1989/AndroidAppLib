@@ -30,10 +30,7 @@ public final class MultiRequestWatchDog {
 
         this.latch.await(time, unit);
 
-        if (mainTaskSuccessCount.get() > 0) {
-            return true;
-        }
+        return mainTaskSuccessCount.get() > 0;
 
-        return false;
     }
 }

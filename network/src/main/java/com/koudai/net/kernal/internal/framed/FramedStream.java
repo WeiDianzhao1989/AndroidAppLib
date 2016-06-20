@@ -87,12 +87,9 @@ public final class FramedStream {
         if (errorCode != null) {
             return false;
         }
-        if ((source.finished || source.closed)
+        return !((source.finished || source.closed)
                 && (sink.finished || sink.closed)
-                && responseHeaders != null) {
-            return false;
-        }
-        return true;
+                && responseHeaders != null);
     }
 
     /** Returns true if this stream was created by this peer. */

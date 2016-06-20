@@ -59,11 +59,11 @@ public abstract class Task<ResultType> {
         }
     }
 
-    public static enum State {
+    public enum State {
         Null(0), Waiting(1), Running(2), Finished(3), Cancelled(4), Error(5);
         private final int value;
 
-        private State(int value) {
+        State(int value) {
             this.value = value;
         }
 

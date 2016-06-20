@@ -78,11 +78,15 @@ public class IOUtil {
             out = new BufferedOutputStream(out);
         }
         int len = 0;
-        byte[] buffer = new byte[1024];
-        while ((len = in.read(buffer)) != -1) {
-            out.write(buffer, 0, len);
+        byte[] buffer = ByteArrayPoolUtil.getBuf(2048);
+        try {
+            while ((len = in.read(buffer)) != -1) {
+                out.write(buffer, 0, len);
+            }
+        } finally {
+            ByteArrayPoolUtil.returnBuf(buffer);
+            out.flush();
         }
-        out.flush();
     }
 
     public static boolean deleteFileOrDir(File path) {

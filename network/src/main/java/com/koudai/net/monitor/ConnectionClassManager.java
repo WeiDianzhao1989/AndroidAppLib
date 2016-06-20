@@ -203,7 +203,7 @@ public class ConnectionClassManager {
      * changes ConnectionClass.
      * @param bandwidthState The new ConnectionClass.
      */
-    public void onBandwidthStateChange(ConnectionQuality bandwidthState);
+    void onBandwidthStateChange(ConnectionQuality bandwidthState);
   }
 
   /**

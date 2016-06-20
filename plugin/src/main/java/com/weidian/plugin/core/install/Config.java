@@ -5,6 +5,7 @@ import android.graphics.drawable.Drawable;
 
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 
 public final class Config {
     /*package*/ String label;
@@ -13,9 +14,9 @@ public final class Config {
     /*package*/ String versionName;
     /*package*/ Drawable icon;
     /*package*/ LinkedHashSet<String> dependence;
-    /*package*/ HashMap<String, String> actionMap;       // <action, className>
-    /*package*/ HashMap<String, ActivityInfo> pageMap;   // <className, info>
-    /*package*/ HashMap<String, String[]> receiverMap;   // <className, actionList>
+    /*package*/ Map<String, String> actionMap;       // <action, className>
+    /*package*/ Map<String, ActivityInfo> pageMap;   // <className, info>
+    /*package*/ Map<String, String[]> receiverMap;   // <className, actionList>
 
     public String getLabel() {
         return label;
@@ -45,7 +46,7 @@ public final class Config {
      * key: action
      * value: className
      */
-    public HashMap<String, String> getActionMap() {
+    public Map<String, String> getActionMap() {
         return actionMap;
     }
 
@@ -53,7 +54,7 @@ public final class Config {
      * key: className
      * value: info
      */
-    public HashMap<String, ActivityInfo> getPageMap() {
+    public Map<String, ActivityInfo> getPageMap() {
         return pageMap;
     }
 
@@ -61,7 +62,7 @@ public final class Config {
      * key: className
      * value: actionList
      */
-    public HashMap<String, String[]> getReceiverMap() {
+    public Map<String, String[]> getReceiverMap() {
         return receiverMap;
     }
 

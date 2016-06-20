@@ -36,7 +36,7 @@ public final class Module extends Plugin {
      * 注册广播接收者
      */
     private void registerReceivers() {
-        HashMap<String, String[]> map = this.getConfig().getReceiverMap();
+        Map<String, String[]> map = this.getConfig().getReceiverMap();
         if (map != null && map.size() > 0) {
             registerReceiverList = new LinkedList<BroadcastReceiver>();
             for (Map.Entry<String, String[]> entry : map.entrySet()) {

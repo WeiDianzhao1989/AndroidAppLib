@@ -414,7 +414,7 @@ public class PriorityBlockingQueue<E> extends AbstractQueue<E>
 
             int k = 0;
             for (Node<T> p = (Node<T>) head.next; p != null; p = p.next)
-                a[k++] = (T) p.getValue();
+                a[k++] = p.getValue();
             if (a.length > k)
                 a[k] = null;
             return a;

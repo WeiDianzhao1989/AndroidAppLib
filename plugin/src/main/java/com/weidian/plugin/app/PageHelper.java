@@ -61,7 +61,7 @@ public class PageHelper {
     }
 
     public static int getThemeResId(Activity activity, ContextProxy contextProxy) {
-        HashMap<String, ActivityInfo> pageMap = contextProxy.getPlugin().getConfig().getPageMap();
+        Map<String, ActivityInfo> pageMap = contextProxy.getPlugin().getConfig().getPageMap();
         if (pageMap != null) {
             ActivityInfo info = pageMap.get(activity.getClass().getName());
             if (info != null) {
@@ -72,7 +72,7 @@ public class PageHelper {
     }
 
     public static void initTitleBar(Activity activity, ContextProxy contextProxy) {
-        HashMap<String, ActivityInfo> pageMap = contextProxy.getPlugin().getConfig().getPageMap();
+        Map<String, ActivityInfo> pageMap = contextProxy.getPlugin().getConfig().getPageMap();
         if (pageMap != null) {
             ActivityInfo info = pageMap.get(activity.getClass().getName());
             if (info != null) {

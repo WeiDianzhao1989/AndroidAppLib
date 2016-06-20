@@ -348,8 +348,8 @@ public enum CipherSuite {
    * @param sinceJavaVersion the first major Java release supporting this cipher suite.
    * @param sinceAndroidVersion the first Android SDK version supporting this cipher suite.
    */
-  private CipherSuite(
-      String javaName, int value, int rfc, int sinceJavaVersion, int sinceAndroidVersion) {
+  CipherSuite(
+          String javaName, int value, int rfc, int sinceJavaVersion, int sinceAndroidVersion) {
     this.javaName = javaName;
   }
 

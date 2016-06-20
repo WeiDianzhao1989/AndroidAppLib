@@ -302,13 +302,10 @@ public final class StreamAllocation {
     }
 
     boolean canRetryRequestBody = requestBodyOut == null || requestBodyOut instanceof RetryableSink;
-    if ((routeSelector != null && !routeSelector.hasNext()) // No more routes to attempt.
+    return !((routeSelector != null && !routeSelector.hasNext()) // No more routes to attempt.
             || !isRecoverable(e)
-            || !canRetryRequestBody) {
-      return false;
-    }
+            || !canRetryRequestBody);
 
-    return true;
   }
 
   private boolean isRecoverable(IOException e) {

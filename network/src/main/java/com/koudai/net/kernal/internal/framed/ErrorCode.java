@@ -47,7 +47,7 @@ public enum ErrorCode {
   public final int spdyRstCode;
   public final int spdyGoAwayCode;
 
-  private ErrorCode(int httpCode, int spdyRstCode, int spdyGoAwayCode) {
+  ErrorCode(int httpCode, int spdyRstCode, int spdyGoAwayCode) {
     this.httpCode = httpCode;
     this.spdyRstCode = spdyRstCode;
     this.spdyGoAwayCode = spdyGoAwayCode;

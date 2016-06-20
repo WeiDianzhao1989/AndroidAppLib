@@ -31,7 +31,7 @@ import java.util.Map;
         try {
             String action = (String) msg.get("action");
             if (action != null) {
-                HashMap<String, String> actionMap = plugin.getConfig().getActionMap();
+                Map<String, String> actionMap = plugin.getConfig().getActionMap();
                 if (actionMap != null) {
                     className = actionMap.get(action);
                 } else {
@@ -39,11 +39,16 @@ import java.util.Map;
                 }
             }
 
+            if (className == null || "".equals(className)) {
+                msgCallback.error(
+                        new RuntimeException("no " + action + " register in plugin"), false);
+            }
+
             if (className.charAt(0) == '.') {
                 className = plugin.getConfig().getPackageName() + className;
             }
 
-            HashMap<String, ActivityInfo> pageMap = plugin.getConfig().getPageMap();
+            Map<String, ActivityInfo> pageMap = plugin.getConfig().getPageMap();
             ActivityInfo info = pageMap.get(className);
             result.put(PageHelper.PAGE_INFO_KEY, info);
             result.put(PageHelper.PAGE_CLASS_KEY, plugin.loadClass(className));
