@@ -53,6 +53,10 @@ public final class RequestParams {
         this.params.putAll(params);
     }
 
+    public void putAll(RequestParams params) {
+        this.params.putAll(params.toMap());
+    }
+
     @Override
     public int hashCode() {
         return params.hashCode();

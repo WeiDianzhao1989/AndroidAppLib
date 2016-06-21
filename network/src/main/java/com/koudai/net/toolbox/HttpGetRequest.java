@@ -198,8 +198,8 @@ public final class HttpGetRequest<T> extends HttpRequest<T> {
             return this;
         }
 
-        public Builder<T> params(RequestParams parmas) {
-            this.params = parmas;
+        public Builder<T> params(RequestParams params) {
+            this.params = params;
             return this;
         }
 
